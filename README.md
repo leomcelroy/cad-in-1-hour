@@ -19,4 +19,31 @@ Constructive Solid Geometrey (CSG)
     - Numerical
     - Algebraic
   - Compass and Straightedge Reconstruction?
-  - Graph Decomposition?    
+  - Graph Decomposition?
+ 
+# Figures
+
+### BREP
+
+Interactive Table
+
+<img width="691" alt="Screenshot 2024-04-21 at 12 05 30 PM" src="https://github.com/leomcelroy/cad-in-1-hour/assets/27078897/2352e4ee-e9fe-403a-9614-9196cac50577">
+
+3D Thing, Table, Step File Format
+
+### FREP/SDF
+
+Basic SDF demo
+
+### FREP -> Voxels
+
+### FREP -> Surface
+
+- Marching Cubes
+- Dual Contouring
+
+### Constraint Solving
+
+
+
+
