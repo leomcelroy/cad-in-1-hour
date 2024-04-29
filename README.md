@@ -270,6 +270,8 @@ Interestingly there were more former D-Cubed Ltd employees wandering the comment
 
 ### Boundary Representation (B-Rep)
 
+__GLEN GREY VIDEO__
+
 ### Geometric Constraint Solvers
 
 Constraint solvers are allow designers to describe geometry based on relationships like coincidence between points, distances, and angles.
@@ -322,12 +324,17 @@ __Numerical__
 
 Let's start with a simple constraint system:
 
-- Point A in green is fixed at 0,0.
+- Point A in green is fixed at 0, 0.
 - Point B in blue is 10 units away from point A.
 - Point C is vertical to Point A.
 - Point C is horizontal to Point B.
 
 Let's first think about how we could describe this system algebraically.
+
+- `a_x = 0` and `a_y = 0`
+- `Math.sqrt( (b_x - a_x)**2 + (b_y - a_y)**2 ) = 10`
+- `c_x = a_x`
+- `c_y = b_y`
 
 Now that we have this system of equations how could we go about solving it.
 
@@ -339,9 +346,240 @@ This means we are going to use the computer for what it's really good at.
 Doing lots of calculations repeated while attempting to approach a solution.
 
 We will need to first develop a cost function. 
-We'll be using the gradient of this function to approach a solution
+We'll be using the gradient of this function to approach a solution so we want the solution to occur at some sort of extrema point.
+Let's use the minimum and the structure our cost function so the absolute minimums occur at 0.
+We can guarantee this by setting our equations to 0 and then take the same of each of them squared, so the 4 equations become:
 
-<!-- mention optimization approaches DogLeg, Levenberg-Marquardt, BFGS or SQP -->
+- `a_x - 0 = 0` and `a_y - 0 = 0`
+- `sqrt( (b_x - a_x)^2 + (b_y - a_y)^2 ) - 10 = 0`
+- `c_x - a_x = 0`
+- `c_y - b_y = 0`
+
+Which when all squared and added together become:
+
+```
+(a_x - 0)^2 + (a_y - 0)^2 
++ (sqrt( (b_x - a_x)^2 + (b_y - a_y)^2 ) - 10)^2
++ (c_x - a_x)^2
++ (c_y - b_y)^2
+= 0
+```
+
+To apply gradient descent well also need the gradient at each evalution point.
+We can obtain this using [automatic differentiation](./papers/auto-diff.pdf) (in this case forward mode).
+
+Note that the equations above are not written in JavaScript, for convience I found it easier to write my own little differentable calculator language.
+The explanation below will explain why this was neccessary (it wasn't, but it did provide some convience).
+
+You can play with this calculator below it supports
+
+- addition: `+`
+- subtraction: `-`
+- multiplication: `*`
+- division: `/`
+- negative: `-`
+- power (with whole numbers): `^`
+- exponentiation (with whole numbers): `exp`
+- logarithm (with whole numbers): `log`
+- trigonometric functions: `sin`, `cos`, `tan`
+- inverse trigonometric functions: `asin`, `acos`, `atan`
+
+__DEMO of differential calculator__
+
+This works by representing numbers as dual numbers, which are pairs a value and it's derivative.
+
+```js
+function valder (val, der) {
+  return {
+    type: "valder",
+    val: val,
+    der: der,
+  }
+}
+```
+
+We then implement all of our arithmetic operations to work with these dual numbers and encode rules for differentiation into these functions.
+
+For one of the simpler examples let's look at plus.
+
+```js
+function plus(x0, x1) {
+  if ((typeof x0 === "number") && (typeof x1 === "number") && !isNaN(x0) && !isNaN(x1)) {
+    return x0 + x1
+  } else if ((x0.type === "valder") || (x1.type === "valder")) {
+
+    if ((typeof x0 === "number") && (typeof x1 !== "number")) {
+      x0 = valder(x0, x1.der.map(temp => 0));
+    }
+
+    if ((typeof x1 === "number") && (typeof x0 !== "number")) {
+      x1 = valder(x1, x0.der.map(temp => 0));
+    }
+
+    return valder(plus(x0.val, x1.val), x0.der.map((temp, index) => plus(temp, x1.der[index])))
+  }
+}
+```
+
+Notice how we apply the chain rule when calculating the derivative value for our multiplication function.
+
+```js
+function mul(x0, x1) {
+  if ((typeof x0 === "number") && (typeof x1 === "number") && !isNaN(x0) && !isNaN(x1)) {
+    return x0 * x1
+  } else if ((x0.type === "valder") || (x1.type === "valder")) {
+
+    if ((typeof x0 === "number") && (typeof x1 !== "number")) {
+      x0 = valder(x0, x1.der.map(temp => 0));
+    }
+
+    if ((typeof x1 === "number") && (typeof x0 !== "number")) {
+      x1 = valder(x1, x0.der.map(temp => 0));
+    }
+
+    return valder(mul(x0.val, x1.val), x1.der.map((temp, index) => plus(mul(temp, x0.val), mul(x1.val, x0.der[index]))));
+  }
+}
+```
+
+You can find the [full automatic differentiation implementation here](./constraint-solving/autodiff.js).
+
+Now just our distance equation will become 
+
+```js
+function distance(d, p1, p2) {
+
+  const p1x = valder(p1[0], [1, 0, 0, 0]); 
+  const p1y = valder(p1[1], [0, 1, 0, 0]); 
+  const p2x = valder(p2[0], [0, 0, 1, 0]); 
+  const p2y = valder(p2[1], [0, 0, 0, 1]);
+
+  return minus(
+    d, 
+    sqrt(
+      plus(
+        power(minus(p2x, p1x), 2), 
+        power(minus(p2y, p1y), 2)
+      )
+    )
+  );
+}
+```
+
+which can start to motivate why we want our little language. 
+There is still a better reason to come though.
+
+Speaking of which [the parser for the language is available here](./constraint-solving/parser.js).
+
+The [evaluator for the langauge can be found here](./constraint-solving/evaluate.js).
+
+It provides us with this evaluate function:
+
+```js
+evaluate(equation, variableValues)
+```
+
+Which can be used as such:
+
+```js
+evaluate("sin(x)", { x: 1 })
+```
+
+Okay so now that we can express and evaluate the algebraic representations of our constraints let's solve our constraint problem by minimizing our cost function.
+
+We could use strict gradient descent but there are algorithms that work better with these sorts of non-linear least squares problems.
+FreeCAD's solver planegcs gives options to use DogLeg, Levenberg-Marquardt, BFGS or SQP. 
+You can find a variety of [non-linear least squares optimization algorithms explained here](./papers/non-linear-least-squares.pdf).
+
+I've found the Levenberg–Marquardt algorithm works quite well.
+The Levenberg-Marquardt interpolates between Gauss-Newton and gradient descent.
+
+You can find [the complete implementation of the Levenberg-Marquardt and the numerical equation system solver here](./constraint-solving/solveSystem.js).
+
+It provides us with this function:
+
+```js
+
+function solveSystem(
+  eqns, 
+  vars, 
+  {
+    forwardSubs = {},
+    epsilon = 0.00001
+  } = {}
+) {
+  ...
+}
+```
+
+`eqns` is a list of equation strings, 
+`vars` is an object of initial guesses of the form `{ "x": 1 }`,
+and the third argument is options. 
+Note that you can provide a list of forward substitions.
+This is one of the primary conviences of our choice to use a little language
+and to represent our equations as strings. 
+We can use string replacement to "symbolically" substitute some variables.
+This is convienent for known equality constraints like coincidence, vertical, or horizontal.
+The substitutions are applied as such:
+
+```js
+Object.entries(forwardSubs).forEach(([variable, value]) => {
+    eqns = eqns.map(eq => eq.replaceAll(variable, value));
+  })
+```
+
+So now with all of that we can describe our constrained system like so:
+
+```js
+// a helper function for creating distance constraints
+function createDistanceConstraint(p0, p1, dist) {
+  const p0x = `${p0}_x`;
+  const p1x = `${p1}_x`;
+  const p0y = `${p0}_y`;
+  const p1y = `${p1}_y`;
+
+  return [`${dist} - sqrt((${p1x}-${p0x})^2+(${p1y}-${p0y})^2)`]
+}
+
+const constrainedGeometry = {
+    pts: {
+      "a": { x: 50, y: 50 },
+      "b": { x: 0,  y: 50 },
+      "c": { x: 0,  y: 50 }
+    },
+    constraints: [
+      createDistanceConstraint("a", "b"),
+      createDistanceConstraint("a", "b"),
+      `50 - a_x`, 
+      `c_y - a_y`, 
+      `20 - a_y`, 
+      `c_x - b_x`
+    ],
+    forwardSubs: {
+
+    }
+}
+
+const initialVals = {};
+
+// break each point into its x and y variables
+Object.entries(constrainedGeometry.pts).forEach(([id, pt]) => {
+  initialVals[`${id}_x`] = pt.x;
+  initialVals[`${id}_y`] = pt.y;
+})
+
+const [ satisfied, solutions ] = solveSystem(
+  constraints, 
+  initialVals, 
+  { forwardSubs: constrainedGeometry.forwardSubs }
+);
+
+// update the geometry
+Object.entries(solutions).forEach(([id, val]) => {
+  const [ptId, xy] = id.split("_");
+  constrainedGeometry.pts[ptId][xy] = val;
+})
+```
 
 __DEMO OF SYSTEM DESCRIBED__
 
