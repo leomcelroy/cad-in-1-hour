@@ -97,7 +97,7 @@ Treating this expression as an inequality rather than a numeric value is typical
 SDFs are the terminology more commonly used in shader art communities such as (ShaderToy)[https://www.shadertoy.com/].
 
 ![DEMO of circle renderer, slider to adjust radius, slider to adjust resolution]()
-<div id="interactive-constraint" class="interactive-demo"></div>
+<div id="frep" class="interactive-demo"></div>
 
 Let's do that in 3D and make a sphere.
 

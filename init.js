@@ -1,6 +1,7 @@
 import hljs from 'https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/+esm';
 import { marked } from 'https://cdn.jsdelivr.net/npm/marked@12.0.2/+esm'
 import { initInteractiveConstraints } from "./demos/constraints.js";
+import { init2DFREP } from "./demos/frep-2d.js";
 
 const renderer = new marked.Renderer();
 
@@ -20,9 +21,8 @@ const html = marked(rawMarkdown);
 
 document.body.innerHTML = html;
 
-const el = document.querySelector("#interactive-constraint");
-initInteractiveConstraints(el);
-
+// initInteractiveConstraints("#interactive-constraint");
+init2DFREP("#frep");
 
 
 

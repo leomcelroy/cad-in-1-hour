@@ -1,5 +1,5 @@
-const RESOLUTION = 30;
-const SHOW_GRID = true;
+let RESOLUTION = 10;
+let SHOW_GRID = true;
 // add option to show field
 // add option to type in sdfs
 // slider for inputs
@@ -36,8 +36,7 @@ const intersection = (sdf1, sdf2) => (x, y) => Math.max(sdf1(x, y), sdf2(x, y));
 const difference = (sdf1, sdf2) => (x, y) => Math.max(sdf1(x, y), -sdf2(x, y));
 
 // Renderer function
-function renderSDF(canvasId, sdfFunc) {
-    const canvas = document.getElementById(canvasId);
+function renderSDF(canvas, sdfFunc) {
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
     const height = canvas.height;
@@ -73,29 +72,11 @@ function renderSDF(canvasId, sdfFunc) {
           }
       }
 
-    if (SHOW_GRID) drawSquareGrid(canvasId, RESOLUTION, "lightblue");
+    if (SHOW_GRID) drawSquareGrid(canvas, RESOLUTION, "lightblue");
 
 }
 
-// Call the renderer with the circle SDF
-document.addEventListener('DOMContentLoaded', () => {
-    renderSDF('sdfCanvas', (x, y) => {
-      let rect = rectangleSDF(1.2, .2);
-      let circle = circleSDF(.5);
-      // circle = translate(circle, .2, .2);
-      let final = union(rect, circle);
-
-      return final(x, y);
-    });
-});
-
-function drawSquareGrid(canvasId, resolution, gridColor) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) {
-      console.error('Canvas element not found');
-      return;
-  }
-
+function drawSquareGrid(canvas, resolution, gridColor) {
   const ctx = canvas.getContext('2d');
   const width = canvas.width;
   const height = canvas.height;
@@ -122,6 +103,21 @@ function drawSquareGrid(canvasId, resolution, gridColor) {
   ctx.stroke();
 }
 
-function init2DFREP(el) {
+export function init2DFREP(elId) {
+  const el = document.querySelector(elId);
+  console.log(el);
   const canvas = document.createElement("canvas");
+  canvas.width = 400;
+  canvas.height = 400;
+
+  renderSDF(canvas, (x, y) => {
+    let rect = rectangleSDF(1.2, .2);
+    let circle = circleSDF(.5);
+    // circle = translate(circle, .2, .2);
+    let final = union(rect, circle);
+
+    return final(x, y);
+  });
+
+  el.appendChild(canvas);
 }

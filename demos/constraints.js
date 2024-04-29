@@ -5,7 +5,9 @@ import { evaluate } from "../js/evaluate.js";
 
 const HEAT_MAP_SIZE = 14;
 
-export function initInteractiveConstraints(targetEl) {
+export function initInteractiveConstraints(elId) {
+  const targetEl = document.querySelector(elId);
+  console.log(targetEl);
 
   // STATE
   const STATE = {
