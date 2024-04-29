@@ -23,6 +23,10 @@ document.body.innerHTML = html;
 const el = document.querySelector("#interactive-constraint");
 initInteractiveConstraints(el);
 
+{
+  const el = document.querySelector("#interactive-step");
+  el.innerHTML = `<iframe src="https://step-test.glitch.me/" style="width:100vw;height:600px"></iframe>`
+}
 
 
 
