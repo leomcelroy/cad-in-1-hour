@@ -332,7 +332,7 @@ Let's start with a simple constraint system:
 Let's first think about how we could describe this system algebraically.
 
 - `a_x = 0` and `a_y = 0`
-- `Math.sqrt( (b_x - a_x)**2 + (b_y - a_y)**2 ) = 10`
+- `sqrt( (b_x - a_x)^2 + (b_y - a_y)^2 ) = 10`
 - `c_x = a_x`
 - `c_y = b_y`
 
@@ -442,24 +442,24 @@ function mul(x0, x1) {
 }
 ```
 
-You can find the [full automatic differentiation implementation here](./constraint-solving/autodiff.js).
+You can find the [full automatic differentiation implementation here](./js/autodiff.js).
 
 Now just our distance equation will become 
 
 ```js
-function distance(d, p1, p2) {
+function distance(d, p0, p1) {
 
-  const p1x = valder(p1[0], [1, 0, 0, 0]); 
-  const p1y = valder(p1[1], [0, 1, 0, 0]); 
-  const p2x = valder(p2[0], [0, 0, 1, 0]); 
-  const p2y = valder(p2[1], [0, 0, 0, 1]);
+  const p0x = valder(p0[0], [1, 0, 0, 0]); 
+  const p0y = valder(p0[1], [0, 1, 0, 0]); 
+  const p1x = valder(p1[0], [0, 0, 1, 0]); 
+  const p1y = valder(p1[1], [0, 0, 0, 1]);
 
   return minus(
     d, 
     sqrt(
       plus(
-        power(minus(p2x, p1x), 2), 
-        power(minus(p2y, p1y), 2)
+        power(minus(p1x, p0x), 2), 
+        power(minus(p1y, p0y), 2)
       )
     )
   );
@@ -469,9 +469,9 @@ function distance(d, p1, p2) {
 which can start to motivate why we want our little language. 
 There is still a better reason to come though.
 
-Speaking of which [the parser for the language is available here](./constraint-solving/parser.js).
+Speaking of which [the parser for the language is available here](./js/parser.js).
 
-The [evaluator for the langauge can be found here](./constraint-solving/evaluate.js).
+The [evaluator for the langauge can be found here](./js/evaluate.js).
 
 It provides us with this evaluate function:
 
@@ -494,39 +494,24 @@ You can find a variety of [non-linear least squares optimization algorithms expl
 I've found the Levenberg–Marquardt algorithm works quite well.
 The Levenberg-Marquardt interpolates between Gauss-Newton and gradient descent.
 
-You can find [the complete implementation of the Levenberg-Marquardt and the numerical equation system solver here](./constraint-solving/solveSystem.js).
+You can find [the complete implementation of the Levenberg-Marquardt and the numerical equation system solver here](./js/solveSystem.js).
 
 It provides us with this function:
 
 ```js
 
-function solveSystem(
-  eqns, 
-  vars, 
-  {
-    forwardSubs = {},
-    epsilon = 0.00001
-  } = {}
-) {
+function solveSystem(eqns, vars, ops) {
   ...
 }
 ```
 
 `eqns` is a list of equation strings, 
 `vars` is an object of initial guesses of the form `{ "x": 1 }`,
-and the third argument is options. 
+`ops` is optional arguments which include `{ forwardSubs, epsilon }`. 
 Note that you can provide a list of forward substitions.
-This is one of the primary conviences of our choice to use a little language
-and to represent our equations as strings. 
+This is one of the primary conviences of our choice to use a little language and to represent our equations as strings. 
 We can use string replacement to "symbolically" substitute some variables.
 This is convienent for known equality constraints like coincidence, vertical, or horizontal.
-The substitutions are applied as such:
-
-```js
-Object.entries(forwardSubs).forEach(([variable, value]) => {
-    eqns = eqns.map(eq => eq.replaceAll(variable, value));
-  })
-```
 
 So now with all of that we can describe our constrained system like so:
 
@@ -538,26 +523,22 @@ function createDistanceConstraint(p0, p1, dist) {
   const p0y = `${p0}_y`;
   const p1y = `${p1}_y`;
 
-  return [`${dist} - sqrt((${p1x}-${p0x})^2+(${p1y}-${p0y})^2)`]
+  return `${dist} - sqrt((${p1x}-${p0x})^2+(${p1y}-${p0y})^2)`
 }
 
 const constrainedGeometry = {
     pts: {
-      "a": { x: 50, y: 50 },
-      "b": { x: 0,  y: 50 },
-      "c": { x: 0,  y: 50 }
+      a: { x: 50, y: 50 },
+      b: { x: 25,  y: 25 },
+      c: { x: 0,  y: 50 }
     },
     constraints: [
-      createDistanceConstraint("a", "b"),
-      createDistanceConstraint("a", "b"),
-      `50 - a_x`, 
-      `c_y - a_y`, 
-      `20 - a_y`, 
-      `c_x - b_x`
-    ],
-    forwardSubs: {
-
-    }
+      createDistanceConstraint("a", "b", 10),
+      "a_x",
+      "a_y",
+      "c_x - a_x",
+      "c_y - b_y"
+    ]
 }
 
 const initialVals = {};
@@ -566,22 +547,27 @@ const initialVals = {};
 Object.entries(constrainedGeometry.pts).forEach(([id, pt]) => {
   initialVals[`${id}_x`] = pt.x;
   initialVals[`${id}_y`] = pt.y;
-})
+});
 
 const [ satisfied, solutions ] = solveSystem(
-  constraints, 
-  initialVals, 
-  { forwardSubs: constrainedGeometry.forwardSubs }
+  constrainedGeometry.constraints, 
+  initialVals
 );
 
 // update the geometry
 Object.entries(solutions).forEach(([id, val]) => {
   const [ptId, xy] = id.split("_");
   constrainedGeometry.pts[ptId][xy] = val;
-})
+});
 ```
 
+One of the benefits of this approach and havign to provide an initial guess is that we can inform that guess from user interaction.
+If a user drags a piece of geometry and we set the initial guess to that target we will likely find a solution near where the user requested.
+This can make the solver feel more intuitive to use.
+
 __DEMO OF SYSTEM DESCRIBED__
+
+Show variety of constraint equations
 
 __Graph Constructive__
 
