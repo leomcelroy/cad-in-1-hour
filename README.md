@@ -78,13 +78,26 @@ Well the simplest approach would be to pick some sampling resolution.
 When the distance is negative we'll consider ourselves inside of the the circle, when positive we'll be outside.
 
 ```js
-// rendering code in 2d
+for (let y = 0; y < RESOLUTION; y++) {
+  for (let x = 0; x < RESOLUTION; x++) {
+    // Normalize the coordinates to [-1, 1]
+    // 1/RESOLUTION centers the sample in the cell
+    const nx = ((x / RESOLUTION) * 2 - 1) + 1/RESOLUTION;
+    const ny = ((y / RESOLUTION) * 2 - 1) + 1/RESOLUTION;
+
+    const inside = sdfFunc(nx, -ny) < 0;
+    ctx.fillStyle = '#ff000090'
+    const cellSize = Math.min(width, height) / RESOLUTION;
+    if (inside)  ctx.fillRect(x*cellSize, y*cellSize, cellSize, cellSize);
+  }
+}
 ```
 
 Treating this expression as an inequality rather than a numeric value is typically considered the distinction between a functional representation (FRep) and a SDF (signed distance field).
 SDFs are the terminology more commonly used in shader art communities such as (ShaderToy)[https://www.shadertoy.com/].
 
 ![DEMO of circle renderer, slider to adjust radius, slider to adjust resolution]()
+<div id="interactive-constraint" class="interactive-demo"></div>
 
 Let's do that in 3D and make a sphere.
 
