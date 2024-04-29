@@ -1,27 +1,106 @@
+@import 'https://fonts.googleapis.com/css?family=Roboto:300,400,500';
+
+/* Basic Resets */
 * {
   box-sizing: border-box;
+  margin: 0;
   padding: 0;
-  margin: 0; 
 }
 
-
+/* Body styling */
 body {
-  padding-bottom: 100px;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  color: #555; /* Consolidated color to one value, removing overrides */
+  line-height: 1.5;
+  margin: 0 auto;
+  max-width: 50em;
+  padding: 4em 1em;
 }
 
-.node circle {
-    fill: skyblue;
-    stroke: black;
-    stroke-width: 1.5px;
+/* Headers */
+h1, h2, strong {
+  color: #333;
 }
 
-.node text {
-    font: 10px sans-serif;
-    pointer-events: none;
+h2 {
+  margin-top: 1em;
+  padding-top: 1em;
 }
 
-.link {
-    fill: none;
-    stroke: black;
-    stroke-width: 1.5px;
+/* Code styling */
+code, pre {
+  background: #eee; /* Final background color */
+  color: #a7adba;
+  padding: 2px 4px;
+  overflow: auto;
+}
+
+code {
+  vertical-align: text-bottom;
+}
+
+pre {
+  border-bottom: 1px solid #d8dee9;
+  border-left: 2px solid #69c;
+  padding: 1em;
+}
+
+/* Links */
+a {
+  color: #e81c4f;
+}
+
+img {
+  display: block;
+  width: 80%;
+  margin: auto;
+}
+
+p {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Header section */
+header {
+  background: #263d36 url("header.jpg") no-repeat center top / cover;
+  line-height: 1.2;
+  padding: 10vw 2em;
+  text-align: center;
+}
+
+header img {
+  display: inline-block;
+  height: 120px;
+  vertical-align: top;
+  width: 120px;
+}
+
+header h1 {
+  color: white;
+  font-size: 2.5em;
+  font-weight: 300;
+}
+
+header a {
+  background: transparent;
+  border: 1px solid #e81c4f;
+  border-radius: 290486px; /* Consider using "50%" for full circles */
+  color: white;
+  font-size: 0.6em;
+  letter-spacing: 0.2em;
+  padding: 1em 2em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 200ms ease-out, background 200ms ease-out;
+}
+
+header a:hover {
+  background: #e81c4f;
+  color: white;
+}
+
+.interactive-demo {
+  display: flex;
+  justify-content: center;
 }
