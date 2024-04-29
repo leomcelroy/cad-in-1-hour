@@ -21,8 +21,14 @@ const html = marked(rawMarkdown);
 
 document.body.innerHTML = html;
 
+
 // initInteractiveConstraints("#interactive-constraint");
 init2DFREP("#frep");
+
+{
+  const el = document.querySelector("#interactive-step");
+  el.innerHTML = `<iframe src="https://step-test.glitch.me/" style="width:100vw;height:600px"></iframe>`
+}
 
 
 
