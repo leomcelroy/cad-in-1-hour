@@ -18,11 +18,11 @@ For example standard **solid** modeling tools for mechanical engineer (such as S
 These tools are designed to create solid models (as the name suggests) with watertight or manifold geometry.
 The interfaces restrict users to designing objects which are solid even though the underlying boundary representation can support non-solid geometry.
 
-Another useful categorization of tools is parametric versus direct modelling (or non-parametric).
+Another useful categorization of tools is parametric versus direct modeling (or non-parametric).
 
 ![](./assets/parametric-vs-direct.png)
 
-In direct modelling tools users specify geometry manually, whereas in parametric design
+In direct modeling tools users specify geometry manually, whereas in parametric design
 tools geometry can by derived from other features or abstract operations.
 
 Parameterization can take many forms.
@@ -50,7 +50,7 @@ We'll have a lot to say about constraint solvrs later in this write-up.
 We're going to introduce you to some of the key concepts needed to create design tools.
 We will introduce many of these concepts by demonstrating how to implement minimal (but often practical) versions
 of them in code (JavaScript!). 
-We will cover how to represent solids with analytical distance fields, how to mesh those fields, some history of modern solid modelling CAD tools, BREPs through the context of the step format, and constraint solvers. 
+We will cover how to represent solids with analytical distance fields, how to mesh those fields, some history of modern solid modeling CAD tools, BREPs through the context of the step format, and constraint solvers. 
 
 Let's get into it.
 
@@ -216,11 +216,11 @@ We could generate a different type of 3D representation by filling our solid mod
 This is very similar to how we were rendering our 2D distance fields.
 
 As we demonstrated before there are lots of tools which use these types (SDFs, voxels, meshes) of geometric representations 
-but typical solid modelling CAD tools do something different let's dig into what.
+but typical solid modeling CAD tools do something different let's dig into what.
 
 ### Some (convoluted) CAD History
 
-Solid modelling CAD tools standard for mechanical design can be defined by two technologies which constitute their "kernels": Boundary Representations (B-Reps) and geometric constraint solvers.
+Solid modeling CAD tools standard for mechanical design can be defined by two technologies which constitute their "kernels": Boundary Representations (B-Reps) and geometric constraint solvers.
 
 B-Reps were introduced by Ian Braid in the 1970s while he was a PhD student at Cambridge University's Computet-Aided Design Group.
 
@@ -230,7 +230,7 @@ Ian took over leading the CAD Group in 1975.
 
 In 1974 Ian and three colleagues (including Charles Lang and Alan Grayer) created the company Shape Data Ltd to commercialize the CAD groups research. 
 Ian joined Shape Data full time in 1980. 
-In 1978 the company released Romulus the world's first commercial solid modelling kernel.
+In 1978 the company released Romulus the world's first commercial solid modeling kernel.
 
 In 1986 Ian and two other founders left to start Three-Space Ltd. 
 Three-Space Ltd. created ACIS (Alan, Charles, Ian's System)
@@ -272,11 +272,78 @@ Interestingly there were more former D-Cubed Ltd employees wandering the comment
 
 ### Geometric Constraint Solvers
 
-Constraint solvers are 
+Constraint solvers are allow designers to describe geometry based on relationships like coincidence between points, distances, and angles.
 
-Christoph M. Hoffmann
+There are a variety of approaches to constraint solving which can be surveyed in these papers.
+
+One of the leaders of the field was Christoph M. Hoffmann who spent a majority of his career at Purdue University. 
+A majority of the papers linked were written by Christoph and his collaborators.
+
+Broadly constraint solvers can be broken down into
+
+- Algebraic
+  - Symbolic
+  - Numerical
+- Logic Based
+- Graph Techniques
+  - Constructive
+
+Commerical solvers tend to mix approaches which are optimized for various scenerios.
+
+For general reviews on constraint solving:
+
+[_A Geometric Constraint Solver (1993)_](./papers/geo-solver.pdf)
+
+[_A brief on constraint solving (2004)_](./papers/constraint-brief.pdf)
+
+[_Geometric Constraint Solving in Parametric CAD (2011)_](./papers/geo-constraints-cad.pdf)
+
+[_A review on geometric constraint solving (2022)_](./papers/geo-constraint-review-2022.pdf)
+
+Regarding open source constraint solvers there is [FreeCAD's planegcs](https://github.com/FreeCAD/FreeCAD/tree/main/src/Mod/Sketcher/App/planegcs) 
+(which you can find [some discussion about here](https://forum.freecad.org/viewtopic.php?t=26737) and a [WASM port here](https://github.com/Salusoft89/planegcs))
+and Solvespace's solver.
+
+One of the best write ups on developing a constraint solver comes from [Solvespace](https://solvespace.com/index.pl). 
+
+Solvespace was created by Jonathan Westhues who wrote his one B-Rep engine and geometric constraint solver from scratch.
+
+Solvespace is an extremely well made small CAD tool that is quite useable though not quite at feature parity with industrial tools.
+The primary missing features are the ability to fillet and chamfer geometry after the fact.
+
+Westhues wrote up the inner workings of his [constraint solver here](./papers/sketchflat.pdf).
+The document primarily describes a numerical approach to constraint solving.
+
+Another excellent write up by Matt Keeter on a [very simple least-squares gradient descent solver can be found here](https://www.mattkeeter.com/projects/constraints/).
+
+Below I'll describe my own similar approach to numerical constraint solving in much greater detail (and JavaScipt)
 
 __Numerical__
+
+Let's start with a simple constraint system:
+
+- Point A in green is fixed at 0,0.
+- Point B in blue is 10 units away from point A.
+- Point C is vertical to Point A.
+- Point C is horizontal to Point B.
+
+Let's first think about how we could describe this system algebraically.
+
+Now that we have this system of equations how could we go about solving it.
+
+We could try to do so algebraically but this could be challanging as we require more variables.
+
+Instead (as the section title suggests) let's go about it numerically.
+
+This means we are going to use the computer for what it's really good at. 
+Doing lots of calculations repeated while attempting to approach a solution.
+
+We will need to first develop a cost function. 
+We'll be using the gradient of this function to approach a solution
+
+<!-- mention optimization approaches DogLeg, Levenberg-Marquardt, BFGS or SQP -->
+
+__DEMO OF SYSTEM DESCRIBED__
 
 __Graph Constructive__
 
