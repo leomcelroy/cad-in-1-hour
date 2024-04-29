@@ -20,8 +20,9 @@ import {
 import { parse } from "./parser.js";
 
 const treeTraversal = (node, vars) => {
-  if (node.type === "number") return parseFloat(node.value);
-  else if (node.type === "binary") {
+  if (node.type === "number") {
+    return parseFloat(node.value);
+  } else if (node.type === "binary") {
     let left = treeTraversal(node.left, vars);
     let right = treeTraversal(node.right, vars);
     switch (node.operator) {

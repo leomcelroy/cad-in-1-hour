@@ -126,9 +126,9 @@ Here is a demonstration of applying these operations to our circle and a rectang
 First we'll need a function to describe a rectangle:
 
 ```js
-function rectangleSDF(x, y, cx, cy, w, h) {
-    const dx = Math.abs(x - cx) - w / 2;
-    const dy = Math.abs(y - cy) - h / 2;
+const rectangleSDF = (cx, cy, w, h) => (x, y) => {
+    const dx = Math.abs(x-cx) - w / 2;
+    const dy = Math.abs(y-cy) - h / 2;
 
     const outsideDistance = Math.sqrt(Math.max(dx, 0) ** 2 + Math.max(dy, 0) ** 2);
     const insideDistance = Math.min(Math.max(dx, dy), 0);
@@ -561,7 +561,7 @@ Object.entries(solutions).forEach(([id, val]) => {
 });
 ```
 
-One of the benefits of this approach and havign to provide an initial guess is that we can inform that guess from user interaction.
+One of the benefits of this approach and having to provide an initial guess is that we can inform that guess from user interaction.
 If a user drags a piece of geometry and we set the initial guess to that target we will likely find a solution near where the user requested.
 This can make the solver feel more intuitive to use.
 

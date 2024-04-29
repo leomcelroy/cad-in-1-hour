@@ -72,6 +72,8 @@ const mul = (x0, x1) => {
 }
 
 const div = (x0, x1) => {
+  if (x1 === 0) x1 += 0.0000000000000001;
+
   if ((typeof x0 === "number") && (typeof x1 === "number") && !isNaN(x0) && !isNaN(x1)) {
     return x0 / x1
   } else if ((x0.type === "valder") || (x1.type === "valder")) {
