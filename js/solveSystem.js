@@ -26,7 +26,8 @@ function levenbergMarquardt(
     lambdaUp = 10,
     lambdaDown = 10,
     epsilon = 0.00001,
-    fast = false
+    fast = false,
+    maxSteps = Infinity
   } = {}
 ) {
   let lambda = ogLambda;
@@ -52,7 +53,8 @@ function levenbergMarquardt(
 
   let val_ders = get_val_ders(eqs, variables);
 
-  while (!converged) {
+  let steps = 0;
+  while (!converged && steps < maxSteps) {
 
     if (updateJacobian) {
       [residual, jacobian] = val_ders.map(x => new Matrix(x));
@@ -91,6 +93,8 @@ function levenbergMarquardt(
     } else {
       lambda = lambda * lambdaUp;
     }
+
+    steps++;
   }
 
   return newVariables;
@@ -104,7 +108,8 @@ function splitAt (index, array) {
 
 function solveSystem(eqns, vars, {
   forwardSubs = {},
-  epsilon = 0.00001
+  epsilon = 0.00001,
+  maxSteps = Infinity
 } = {}) {
   Object.entries(forwardSubs).forEach(([variable, value]) => {
     eqns = eqns.map(eq => eq.replaceAll(variable, value));
@@ -117,7 +122,8 @@ function solveSystem(eqns, vars, {
   let varsPrime;
   try {
     varsPrime = levenbergMarquardt(eqns, vars, {
-      epsilon
+      epsilon,
+      maxSteps
     });
 
     Object.entries(forwardSubs).forEach(([variable, value]) => {
