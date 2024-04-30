@@ -23,7 +23,29 @@ document.body.innerHTML = html;
 
 
 // initInteractiveConstraints("#interactive-constraint");
-init2DFREP("#frep");
+init2DFREP("#frep", {
+  sdfFuncString: `
+      let rect = rectangleSDF(1.2, .2);
+      let circle = circleSDF(.5);
+      // circle = translate(circle, .2, .2);
+      let final = union(rect, circle);
+
+      return final(x, y);
+
+  `
+});
+
+init2DFREP("#frep2", {
+  sdfFuncString: `
+      let rect = rectangleSDF(.2, 1.2);
+      let circle = circleSDF(.54);
+      // circle = translate(circle, .2+.3, .2);
+      let final = union(rect, circle);
+
+      return final(x, y);
+
+  `
+});
 
 {
   const el = document.querySelector("#interactive-step");

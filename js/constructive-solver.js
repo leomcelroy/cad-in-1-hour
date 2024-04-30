@@ -64,20 +64,17 @@ const zouTest = {
 
 visualizeGraph(zouTest)
 let graph = zouTest;
-
 let pairs = findArticulationPairs(zouTest);
-graph = splitGraphAtArticulationPair(graph, pairs[0])
-pairs = findArticulationPairs(graph);
-console.log({ graph, pairs });
-visualizeGraph(graph);
-graph = splitGraphAtArticulationPair(graph, pairs[0])
-pairs = findArticulationPairs(graph);
-console.log({ graph, pairs });
-visualizeGraph(graph);
-graph = splitGraphAtArticulationPair(graph, pairs[0])
-pairs = findArticulationPairs(graph);
-console.log({ graph, pairs });
-visualizeGraph(graph);
+
+let MAX_STEPS = 10000;
+let steps = 0;
+while (pairs.length  > 0 && steps < MAX_STEPS) {
+    graph = splitGraphAtArticulationPair(graph, pairs[0])
+    pairs = findArticulationPairs(graph);
+    console.log({ graph, pairs });
+    visualizeGraph(graph); 
+    steps++;
+}
 
 
 function copy(obj) {
@@ -343,6 +340,10 @@ function splitGraphAtArticulationPoint(graph, articulationPoint, pairId = "") {
 
         if (pairId === "") return;
 
+        const articulationPoints = findArticulationPoints(g);
+
+        if (articulationPoints.length === 0) return;
+
         const virtualBondId = `${pairId}_virtual_edge`;
         g.edges.push({
             id: virtualBondId,
@@ -355,7 +356,7 @@ function splitGraphAtArticulationPoint(graph, articulationPoint, pairId = "") {
         // and exactly one more complex subgraph
         // if so remove virtual bonds
 
-        console.log(findArticulationPairs(g))
+        
 
 
     })
