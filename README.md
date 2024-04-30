@@ -116,6 +116,20 @@ The most common approach is to use ray marching.
 
 __EXPLAIN RAY MARCHING__
 
+The idea behind raymarching on SDF's is very simple but clever. 
+
+You shoot out a whole bunch of rays from your eyes, and let the rays hit stuff in the world.
+
+You shoot one ray for each pixel on the screen. And the information about what and how something is hit by that ray determines the pixel's color.
+
+The SDF gives you the distance to the surface, at any given point in space. So you know how far away you are from hitting something. If you're far away, you can stride faster, and if you're almost hitting stuff, you go in tinier steps until you hit the stuff.
+
+This will give you a distance to the stuff you're gonna hit, from the eye, for each pixel.
+
+Then by looking at the SDF values of the local vicinity of the point of collision, you can calculate the normal at that point.
+
+With a normal, now you can calculate all sorts of shadings to make the final rendering look realistic.
+
 __DEMO OF SPHERE__
 
 One of the major advantages of having analytical represenations of our objects is it's very easy to perfrom constructive solid geometry (CSG).
