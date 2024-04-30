@@ -1,5 +1,9 @@
 # CAD in 1 Hour
 
+<div id="frep" class="interactive-demo"></div>
+
+<div id="frep2" class="interactive-demo"></div>
+
 ### The Lay of the Land
 
 Computer Aided Design (CAD) tools can be categorized in a variety of different ways.
@@ -96,8 +100,7 @@ for (let y = 0; y < RESOLUTION; y++) {
 Treating this expression as an inequality rather than a numeric value is typically considered the distinction between a functional representation (FRep) and a SDF (signed distance field).
 SDFs are the terminology more commonly used in shader art communities such as (ShaderToy)[https://www.shadertoy.com/].
 
-![DEMO of circle renderer, slider to adjust radius, slider to adjust resolution]()
-<div id="frep" class="interactive-demo"></div>
+<!-- <div id="frep" class="interactive-demo"></div> -->
 
 Let's do that in 3D and make a sphere.
 
