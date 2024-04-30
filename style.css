@@ -106,3 +106,9 @@ header a:hover {
   display: flex;
   justify-content: center;
 }
+
+.editable-number:hover {
+  background: lightgrey;
+  cursor: col-resize;
+}
+
