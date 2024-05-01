@@ -16,7 +16,7 @@ const literals = ["+", "-", "*", "/", "^", "(", ")", ","];
 
 const tokenRules = {
   ws: /\s+/,
-  symbol: /[a-zA-Z][a-zA-Z\d-]*/,
+  symbol: /[a-zA-Z][a-zA-Z\d_]*/,
   number: /[-]?([0-9]+\.?[0-9]*|\.[0-9]+)/,
   literal: anyOf(literals),
 }
@@ -188,7 +188,7 @@ class Stream { // not used
 export const tokenize = makeTokenizer(tokenRules, { skip, literals });
 
 const convertBi = x => {
-  if (x[2].type === "binary" && PRECEDENCE[x[2].operator] < PRECEDENCE[x[1].value]) {
+  if (x[2].type === "binary" && PRECEDENCE[x[2].operator] <= PRECEDENCE[x[1].value]) {
     return convertBi([
         convertBi([ x[0], x[1], x[2].left ]),
         { type: x[2].operator, value: x[2].operator },
