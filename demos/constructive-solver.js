@@ -1,3 +1,6 @@
+import { html, svg, render } from "../libs/lit-html.js";
+import { createListener } from "../js/createListener.js";
+
 const owensTest = {
     nodes: [
         { id: 'point1', type: 'point' },
@@ -62,26 +65,59 @@ const zouTest = {
 
 
 
-visualizeGraph(zouTest)
-let graph = zouTest;
-let pairs = findArticulationPairs(zouTest);
+export function initGraphDecompositions(selector) {
+  const container = document.querySelector(selector);
+  const id = `_${Date.now()}`
+  container.innerHTML = `
+    <style>
+      #${id}-container {
+        display: flex;
+        overflow: auto;
+        border-radius: 4px;
+        border: 2px solid black;
+        padding: 10px;
+      }
 
-let MAX_STEPS = 10000;
-let steps = 0;
-while (pairs.length  > 0 && steps < MAX_STEPS) {
-    graph = splitGraphAtArticulationPair(graph, pairs[0])
-    pairs = findArticulationPairs(graph);
-    console.log({ graph, pairs });
-    visualizeGraph(graph); 
-    steps++;
+      #${id} {
+        display: flex;
+        gap: 20px;
+      }
+
+      #${id} svg {
+        border-radius: 4px;
+        background: #f3f3f3;
+      }
+    </style>
+    <div id="${id}-container">
+        <div id="${id}">
+
+        </div>
+    </div>
+  `
+
+  visualizeGraph(`#${id}`, zouTest)
+  let graph = zouTest;
+  let pairs = findArticulationPairs(zouTest);
+
+  let MAX_STEPS = 10000;
+  let steps = 0;
+  while (pairs.length  > 0 && steps < MAX_STEPS) {
+      graph = splitGraphAtArticulationPair(graph, pairs[0])
+      pairs = findArticulationPairs(graph);
+      visualizeGraph(`#${id}`, graph); 
+      steps++;
+  }
 }
 
+
+// const triangles = findDisconnectedSubgraphs(graph);
+// renderGeoGraph(triangles)
 
 function copy(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 
-function visualizeGraph(graph) {
+function visualizeGraph(container, graph) {
     graph = copy(graph);
 
     if (typeof d3 === 'undefined') {
@@ -89,18 +125,19 @@ function visualizeGraph(graph) {
         return;
     }
 
-    const width = 800, height = 600;
+    const width = 400, height = 400;
 
     // Create the SVG container
-    const svg = d3.select('body').append('svg')
+    const svg = d3.select(container).append('svg')
         .attr('width', width)
+        .attr('min-width', width)
         .attr('height', height)
         .style('border', '1px solid black');
 
     // Set up the simulation with forces
     const simulation = d3.forceSimulation(graph.nodes)
-        .force('link', d3.forceLink(graph.edges).id(d => d.id).distance(100))
-        .force('charge', d3.forceManyBody().strength(-500))
+        .force('link', d3.forceLink(graph.edges).id(d => d.id).distance(50))
+        .force('charge', d3.forceManyBody().strength(-200))
         .force('x', d3.forceX(width / 2).strength(0.1))
         .force('y', d3.forceY(height / 2).strength(0.1));
 
@@ -111,7 +148,9 @@ function visualizeGraph(graph) {
         .data(graph.edges)
         .enter().append('line')
         .attr('stroke-width', 2)
-        .attr('stroke', 'black');
+        .attr("stroke-dasharray", d => d.type === 'virtual' ? "5, 5" : "none")
+        .attr('stroke', d => d.type === 'virtual' ? 'grey' : 'black'); // Conditionally set the color
+
 
     // Create the nodes (circles)
     const node = svg.append('g')
@@ -119,8 +158,29 @@ function visualizeGraph(graph) {
         .selectAll('circle')
         .data(graph.nodes)
         .enter().append('circle')
-        .attr('r', 10)
-        .attr('fill', 'skyblue')
+        .attr('r', 8)
+        .attr("stroke-width", 3)
+        .attr("stroke", d => {
+          if (d.type === "line") return ""
+
+          return "black"
+        })
+        .attr('fill', d => {
+
+          const ogPoint = d.id.split("_")[0];
+          const color = {
+            "point1": "#f1ac4b",
+            "point2": "#4ba1f1",
+            "point3": "#e03132",
+            "point4": "#4db05e",
+            "line1": "purple",
+            "line2": "#6eefe6",
+            "line3": "#e1b2e5",
+            "line4": "#e16919",
+          }[ogPoint];
+
+          return color;
+        })
         .call(d3.drag()
             .on('start', dragstarted)
             .on('drag', dragged)
@@ -133,8 +193,9 @@ function visualizeGraph(graph) {
         .data(graph.nodes)
         .enter().append('text')
         .text(d => d.id)
-        .attr('x', 8)
-        .attr('y', 3);
+        .style("font-family", "monospace")
+        .style("font-size", "10px")
+        .style("transform", "translate(-10px, 10px)");
 
     // Update positions each tick
     simulation.on('tick', () => {
@@ -303,7 +364,7 @@ function findDisconnectedSubgraphs(graph) {
     return subgraphs;
 }
 
-function splitGraphAtArticulationPoint(graph, articulationPoint, pairId = "") {
+function splitGraphAtArticulationPoint(graph, articulationPoint, { pairId = "" } = {}) {
 
     const splitGraph = removeNode(graph, articulationPoint);
 
@@ -345,12 +406,38 @@ function splitGraphAtArticulationPoint(graph, articulationPoint, pairId = "") {
         if (articulationPoints.length === 0) return;
 
         const virtualBondId = `${pairId}_virtual_edge`;
-        g.edges.push({
-            id: virtualBondId,
-            source: `${articulationPoint}_${i}`,
-            target: `${pairId}_${i}`,
-            type: "virtual"
-        });
+
+        let existingLink = false;
+
+        graph.edges.forEach(e => {
+            const ogTarget = e.target.split("_")[0];
+            const ogSource = e.source.split("_")[0];
+            const ogPairId = pairId.split("_")[0];
+            const ogArticulationId = articulationPoint.split("_")[0];
+
+            const localExistingLink = ogTarget === ogPairId && ogSource === ogArticulationId
+                || ogSource === ogPairId && ogTarget === ogArticulationId;
+
+            if (localExistingLink) {
+                g.edges.push({
+                    id: virtualBondId,
+                    type: e.type,
+                    source: `${articulationPoint}_${i}`,
+                    target: `${pairId}_${i}`,
+                })
+            }
+
+            existingLink = existingLink || localExistingLink;
+        })
+
+        if (!existingLink) {
+            g.edges.push({
+                id: virtualBondId,
+                source: `${articulationPoint}_${i}`,
+                target: `${pairId}_${i}`,
+                type: "virtual"
+            });
+        }
 
         // check if g has no single bonds
         // and exactly one more complex subgraph
@@ -391,12 +478,178 @@ function splitGraphAtArticulationPair(graph, articulationPair) {
         }
     })
 
-    graph = splitGraphAtArticulationPoint(graph, splitId0, splitId1);
+    graph = splitGraphAtArticulationPoint(graph, splitId0, { pairId: splitId1 });
 
 
     return graph
 
 
+}
+
+export function renderGeoGraph(graphs) {
+  // const targetEl = document.querySelector(elId);
+    const targetEl = document.createElement("div");
+    document.body.append(targetEl);
+
+  // STATE
+  const STATE = {
+    pts: {
+      "a": { x: 0, y: 0 },
+      "b": { x: 0,  y: 50 },
+      "c": { x: 24,  y: 50 }
+    },
+    constraints: [],
+    fillMap: {
+      "a": "black",
+      "b": "black",
+      "c": "black"
+    },
+    lines: [
+      ["a", "b"],
+      ["b", "c"]
+    ],
+    graphs: copy(graphs).map(g => {
+        g.translate = {
+          x: randInRange(20, 60), 
+          y: randInRange(20, 60)
+        };
+        g.rotate = 0;
+
+        return g
+    })
+  }
+
+  const view = (state) => {
+    return html`
+      <style>
+        #constraints {
+          width: 700px;
+          height: 400px;
+          border: 1px solid black;
+        }
+      </style>
+      <svg id="constraints" viewBox="-100 -100 200 200">
+        ${state.lines.map(l => drawLine(l.map(id => Object.values(state.pts[id]) ) ) )}
+        ${Object.entries(state.pts).map(drawPoint)}
+        ${state.graphs.map(drawGraphs)}
+      </svg>
+    `
+  }
+
+
+
+  const pointsToString = points => points.map(p => p.join(",") ).join(" ");
+  const drawPoint = ([id, pt], index) => svg`<circle handle data-id=${id} cx=${pt.x} cy=${pt.y} r="5" fill=${STATE.fillMap[id]} stroke="#928e8e"/>`
+  const drawLine = (points) => {
+    return svg`<polyline stroke="grey" stroke-width="3" fill="none" points=${pointsToString(points)} />`
+  }
+
+  function drawGraphs(graph) {
+    console.log(graph);
+
+    const edgeViews = [];
+
+    graph.nodes.forEach((n, i) => {
+        if (n.type === "point") {
+            // edgeViews.push(drawPoint([ n.id, { x: 0, y: 0 } ]));
+        }
+
+        if (n.type === "line") {
+            // edgeViews.push(svg`<polyline stroke="grey" stroke-width="3" fill="none" points="">`)
+        }
+    })
+
+    graph.edges.forEach(e => {
+
+    })
+
+    return svg`
+        <g>
+            ${edgeViews}
+        </g>
+    `
+  }
+
+
+  const r = () => {
+    render(view(STATE), targetEl);
+  }
+
+  STATE.r = r;
+
+  r();
+
+  const listen = createListener(targetEl);
+  addHandleControl(STATE, listen);
+
+}
+
+function addHandleControl(state, listen) {
+  let draggingId = "";
+
+  listen("mousedown", "[handle]", e => {
+    const id = e.target.dataset.id;
+    draggingId = id;
+  });
+
+  listen("mousemove", "", e => {
+    if (draggingId === "") return
+
+    const svg = e.target.closest("svg");
+    if (!svg) return;
+
+    const targetPt = getTransformedCoordinates(e, svg);
+
+    state.pts[draggingId].x = targetPt.x;
+    state.pts[draggingId].y = targetPt.y;
+
+    state.r();
+  });
+
+  listen("mouseup", "", e => {
+    if (draggingId === "") return
+
+    const id = e.target.dataset.id;
+    draggingId = "";
+  });
+}
+
+function getTransformedCoordinates(event, svg) {
+  let pt = svg.createSVGPoint();
+
+  // Pass event coordinates to the point
+  pt.x = event.clientX;
+  pt.y = event.clientY;
+
+  // Transform the point into the SVG coordinate system
+  let svgPoint = pt.matrixTransform(svg.getScreenCTM().inverse());
+
+  return { x: svgPoint.x, y: svgPoint.y };
+}
+
+function getAngle(cx, cy, ex, ey) {
+    const dy = ey - cy;
+    const dx = ex - cx;
+    return Math.atan2(dy, dx);
+}
+
+function rotatePoint(cx, cy, x, y, angle) {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    // Translate point back to origin:
+    x -= cx;
+    y -= cy;
+    // Rotate point
+    const newX = x * cos - y * sin;
+    const newY = x * sin + y * cos;
+    // Translate point back:
+    x = newX + cx;
+    y = newY + cy;
+    return { x, y };
+}
+
+function randInRange(min, max) {
+    return Math.random()*(max-min)+min
 }
 
 

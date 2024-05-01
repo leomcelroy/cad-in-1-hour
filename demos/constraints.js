@@ -1,44 +1,29 @@
 import { html, svg, render } from "../libs/lit-html.js"
 import { createListener } from "../js/createListener.js";
 import { solveSystem } from "../js/solveSystem.js";
-import { evaluate } from "../js/evaluate.js";
+import { compile, evaluate } from "../js/evaluate.js";
 
-const HEAT_MAP_SIZE = 14;
+const HEAT_MAP_SIZE = 16;
 
-export function initInteractiveConstraints(elId) {
+export function initInteractiveConstraints(elId, ops = {}) {
+  const showHeatmap = ops.showHeatmap ?? false;
+  const pts = ops.pts ?? {};
+  const constraints = ops.constraints ?? [];
+  const fillMap = ops.fillMap ?? {};
+  const lines = ops.lines ?? [];
+
+
   const targetEl = document.querySelector(elId);
-  console.log(targetEl);
 
   // STATE
   const STATE = {
-    pts: {
-      "a": { x: 0, y: 0 },
-      "b": { x: 0,  y: 50 },
-      "c": { x: 24,  y: 50 }
-    },
-    constraints: [
-      createDistanceConstraint("a", "b", 60),
-      createDistanceConstraint("b", "c", 30),
-      {
-        eqs: [
-          // "a_x",
-          // "a_y",
-          // "c_x - a_x",
-          // "c_y - b_y"
-        ]
-      } 
-    ],
-    fillMap: {
-      "a": "black",
-      "b": "black",
-      "c": "black"
-    },
-    lines: [
-      ["a", "b"],
-      ["b", "c"]
-    ],
+    pts,
+    constraints,
+    fillMap,
+    lines,
     steps: [],
     heatMap: [],
+    showHeatmap
   }
 
   const view = (state) => {
@@ -101,6 +86,64 @@ export function initInteractiveConstraints(elId) {
 
   STATE.r = r;
 
+  if (STATE.showHeatmap) {
+
+
+    const constraints = STATE.constraints.map(x => x.eqs).flat();
+
+    const initialVals = {};
+
+    Object.entries(STATE.pts).forEach(([id, pt]) => {
+      initialVals[`${id}_x`] = pt.x;
+      initialVals[`${id}_y`] = pt.y;
+    })
+
+    const parseComb = eqs => {
+      eqs = eqs.map(eq => `(${eq})*(${eq})`);
+      return eqs.join("+");
+    }
+
+    const cost = parseComb(constraints);
+
+    let heatMap = [];
+
+    const testId = Object.keys(STATE.pts)[0];
+
+
+    const test = JSON.parse(JSON.stringify(initialVals));
+    const compiledFunc = compile(Object.keys(test), cost);
+
+    // console.log({
+    //   compiled: compiledFunc(...Object.values(test)),
+    //   evaled: evaluate(cost, test)
+    // })
+
+    for (let i = -Math.floor(100/HEAT_MAP_SIZE); i < Math.floor(100/HEAT_MAP_SIZE)+1; i++) {
+      for (let j = -Math.floor(100/HEAT_MAP_SIZE); j < Math.floor(100/HEAT_MAP_SIZE)+1; j++) {
+        const x = i*HEAT_MAP_SIZE;
+        const y = j*HEAT_MAP_SIZE;
+        test[`${testId}_x`] = x;
+        test[`${testId}_y`] = y;
+
+        const { val, der } = compiledFunc(...Object.values(test));
+
+        const xIndex = Object.keys(test).findIndex(x => x === `${testId}_x`);
+        const yIndex = Object.keys(test).findIndex(x => x === `${testId}_y`);
+
+        heatMap.push({ x, y, val: Math.sqrt(der[xIndex]**2 + der[yIndex]**2) });
+      }
+    }
+
+    const maxHeatValue = Math.max(...heatMap.map(x => x.val));
+
+    STATE.heatMap = heatMap.map(x => {
+      x.val = x.val/maxHeatValue;
+
+      return x;
+    })
+  
+  }
+
   r();
 
   const listen = createListener(targetEl);
@@ -136,44 +179,50 @@ function addHandleControl(state, listen) {
       initialVals[`${id}_y`] = pt.y;
     })
 
+    if (state.showHeatmap) {
+
+
+      const parseComb = eqs => {
+        eqs = eqs.map(eq => `(${eq})*(${eq})`);
+        return eqs.join("+");
+      }
+
+      const cost = parseComb(constraints);
+
+      let heatMap = [];
+
+      const test = JSON.parse(JSON.stringify(initialVals));
+      const compiledFunc = compile(Object.keys(test), cost);
+
+      for (let i = -Math.floor(100/HEAT_MAP_SIZE); i < Math.floor(100/HEAT_MAP_SIZE)+1; i++) {
+        for (let j = -Math.floor(100/HEAT_MAP_SIZE); j < Math.floor(100/HEAT_MAP_SIZE)+1; j++) {
+          const x = i*HEAT_MAP_SIZE;
+          const y = j*HEAT_MAP_SIZE;
+          test[`${draggingId}_x`] = x;
+          test[`${draggingId}_y`] = y;
+
+          const { val, der } = compiledFunc(...Object.values(test));
+
+          const xIndex = Object.keys(test).findIndex(x => x === `${draggingId}_x`);
+          const yIndex = Object.keys(test).findIndex(x => x === `${draggingId}_y`);
+
+          heatMap.push({ x, y, val: Math.sqrt(der[xIndex]**2 + der[yIndex]**2) });
+        }
+      }
+
+      const maxHeatValue = Math.max(...heatMap.map(x => x.val));
+
+      state.heatMap = heatMap.map(x => {
+        x.val = x.val/maxHeatValue;
+
+        return x;
+      })
+    }
+
 
     let satisfied = [];
     let solutions = initialVals;
     let points = [varsToPts(solutions)];
-
-    const parseComb = eqs => {
-      eqs = eqs.map(eq => `(${eq})*(${eq})`);
-      return eqs.join("+");
-    }
-
-    const cost = parseComb(constraints);
-
-    let heatMap = [];
-
-    for (let i = -Math.floor(100/HEAT_MAP_SIZE); i < Math.floor(100/HEAT_MAP_SIZE)+1; i++) {
-      for (let j = -Math.floor(100/HEAT_MAP_SIZE); j < Math.floor(100/HEAT_MAP_SIZE)+1; j++) {
-        const test = JSON.parse(JSON.stringify(initialVals));
-        const x = i*HEAT_MAP_SIZE;
-        const y = j*HEAT_MAP_SIZE;
-        test[`${draggingId}_x`] = x;
-        test[`${draggingId}_y`] = y;
-
-        const { val, der } = evaluate(cost, test);
-
-        const xIndex = Object.keys(test).findIndex(x => x === `${draggingId}_x`);
-        const yIndex = Object.keys(test).findIndex(x => x === `${draggingId}_y`);
-
-        heatMap.push({ x, y, val: Math.sqrt(der[xIndex]**2 + der[yIndex]**2) });
-      }
-    }
-
-    const maxHeatValue = Math.max(...heatMap.map(x => x.val));
-
-    state.heatMap = heatMap.map(x => {
-      x.val = x.val/maxHeatValue;
-
-      return x;
-    })
 
     // console.log({
     //   heatMap,
@@ -184,7 +233,7 @@ function addHandleControl(state, listen) {
     // })
 
     let steps = 0;
-    let MAX_STEPS = 1000;
+    let MAX_STEPS = 10000;
     while (satisfied.some(s => !s) && steps < MAX_STEPS || steps === 0) {
       const result = solveSystem(
         constraints, 
@@ -197,10 +246,12 @@ function addHandleControl(state, listen) {
       satisfied = result[0];
       solutions = result[1];
 
-      points.push(varsToPts(solutions));
+      // points.push(varsToPts(solutions));
 
       steps++;
     };
+
+    if (steps === MAX_STEPS) console.log("max stepped");
 
 
     state.pts = varsToPts(solutions);
@@ -256,6 +307,7 @@ function createDistanceConstraint(p0, p1, dist) {
     eqs: [`${dist} - sqrt((${p1x}-${p0x})^2+(${p1y}-${p0y})^2)`]
   }
 }
+
 
 
 

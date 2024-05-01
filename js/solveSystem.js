@@ -1,4 +1,4 @@
-import { evaluate } from './evaluate.js';
+import { evaluate, compile } from './evaluate.js';
 import { linearAlgebra } from '../libs/linear-algebra.js';
 import { lusolve } from "./lusolve.js";
 
@@ -25,7 +25,7 @@ function levenbergMarquardt(
     ogLambda = 10,
     lambdaUp = 10,
     lambdaDown = 10,
-    epsilon = 0.00001,
+    epsilon = 0.0000000000000001,
     fast = false,
     maxSteps = Infinity
   } = {}
@@ -50,8 +50,21 @@ function levenbergMarquardt(
     new_error,
     ds;
 
+  const compiled = eqs.map(eq => compile(Object.keys(variables), eq));
 
-  let val_ders = get_val_ders(eqs, variables);
+  const get_val_ders2 = (eqs, variables) => {
+    const results = compiled.map(f => f(...Object.values(variables)));
+    const final = [[], []];
+
+    results.forEach(valDer => {
+      final[0].push([valDer.val]);
+      final[1].push(valDer.der)
+    })
+
+    return final;
+  };
+
+  let val_ders = get_val_ders2(eqs, variables);
 
   let steps = 0;
   while (!converged && steps < maxSteps) {
@@ -78,7 +91,7 @@ function levenbergMarquardt(
       newVariables[key] = variables[key] - deltas[index];
     });
 
-    new_val_ders = get_val_ders(eqs, newVariables);
+    new_val_ders = get_val_ders2(eqs, newVariables);
 
     new_error = totalError(new_val_ders);
     ds = new_val_ders[1].flat();
@@ -108,7 +121,7 @@ function splitAt (index, array) {
 
 function solveSystem(eqns, vars, {
   forwardSubs = {},
-  epsilon = 0.00001,
+  epsilon = 0.0000000000000001,
   maxSteps = Infinity
 } = {}) {
   Object.entries(forwardSubs).forEach(([variable, value]) => {
@@ -132,12 +145,14 @@ function solveSystem(eqns, vars, {
     })
 
   } catch (err) {
+    console.log(err);
     console.log("Erred during levenbergMarquardt, maybe undefined in jacobian:", err);
     varsPrime = vars;
   }
 
   // ------------ CHECK SATISFACTION ------------
-  let scores = eqns.map(eq => evaluate(eq, varsPrime).val ** 2);
+  const compiled = eqns.map(eq => compile(Object.keys(varsPrime), eq));
+  let scores = compiled.map(fn => fn(...Object.values(varsPrime)).val ** 2);
   let satisfied = scores.map(score => score < Math.sqrt(epsilon));
 
   let result = [];
@@ -162,7 +177,6 @@ function solveSystem(eqns, vars, {
 
     result = [a.concat([false]).concat(b), out];
   }
-
 
 
   return result;
