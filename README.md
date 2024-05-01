@@ -1,5 +1,8 @@
 # CAD in 1 Hour
 
+<div id="interactive-constraint" class="interactive-demo"></div>
+<div id="interactive-constraint-angles" class="interactive-demo"></div>
+
 <div id="frep" class="interactive-demo"></div>
 
 <div id="frep2" class="interactive-demo"></div>
@@ -407,7 +410,7 @@ Commerical solvers tend to mix approaches which are optimized for various scener
 
 For general reviews on constraint solving:
 
-[_A Geometric Constraint Solver (1993)_](./papers/geo-solver.pdf)
+[_A Geometric Constraint Solver (1993)_](./papers/bouma-1993.pdf)
 
 [_A brief on constraint solving (2004)_](./papers/constraint-brief.pdf)
 
@@ -428,6 +431,8 @@ The primary missing features are the ability to fillet and chamfer geometry afte
 
 Westhues wrote up the inner workings of his [constraint solver here](./papers/sketchflat.pdf).
 The document primarily describes a numerical approach to constraint solving.
+
+Another write up of an [optimization approach to constraint solving can be found here](./papers/optimization-solver.pdf).
 
 Another excellent write up by Matt Keeter on a [very simple least-squares gradient descent solver can be found here](https://www.mattkeeter.com/projects/constraints/).
 
@@ -684,14 +689,224 @@ Show variety of constraint equations
 
 __Graph Constructive__
 
+The dominant approach to constraint solving today is analyize the constraint graph
+to develop a solution plan followed by a solver that recursively solves these sub problems and 
+recombines sub-solutions.
+
+There are a variety of approaches to these constructive solvers.
+Some reviews of decomposition approaches to constraint solving can be found below:
+
+[_Decomposition Plans for Geometric Constraint Systems, Part I: Performance Measures for CAD (2001)_](./papers/decomposition-plans-1.pdf)
+
+[_Decomposition Plans for Geometric Constraint Problems, Part II: New Algorithms (2001)_](./papers/decomposition-plans-2.pdf)
+
+The two papers above are once agian from Hoffman and his collaborators Andrew Lomonosov and Meera Sitharam.
+Sitharam is [currently at the University of Florida](https://www.cise.ufl.edu/~sitharam/) and did a lot of work developing
+the Frontier Vertex Algorithm for constraint solving. 
+[According to Bettig and Hoffman](./papers/geo-constraints-cad.pdf) the Frontier Vertex Algorithm completes graph decomposition.
+
+![](./assets/frontier-vertex-complete.png)
+
+[An implementation of this algorithm from Sitharam's group can be found here](https://github.com/Geoplexity/Frontier).
+
+Other reviews can be found in:
+
+[_Decomposition of Geometric Constraint Systems: a Survey (2006)_](./papers/decomposition-2006.pdf)
+
+[_Geometric Constraint Solver (2016)_](./papers/These-Moussaoui_Nov_2016.pdf)
+
+Specific implementations of graph constructive solvers can be found in these papers:
+
+[_A Graph-Constructive Approach to Solving Systems of Geometric Constraints (1997)_](./papers/fudos-1997.pdf)
+
+[_A 2D geometric constraint solver using a graph reduction method (2010)_](./papers/aoudia-2010.pdf)
+
+Hoffman and Joan-Arinyo claim that ["such solvers can be implemented with minimal effort"](./papers/joan-arinyo-1997).
+
+![](./assets/minimal-effort.png)
+
+And I took that personal. So let's do it...
+
 As previously mentioned the first commerical constraint solver was developed by D-Cubed Ltd (once again based in Cambridge).
 D-Cubed was founded by John Owen and based their solver 2D DCM on work developed by Owen
 and described in his 1991 paper [_Algebraic Solution for Geometry from Dimensional Constraints_](./papers/owen-constraints.pdf)
 
+The first step is to understand what exactly is a constraint graph.
 
+Below depicts a triangle with a distance constraint on each edge and its corresponding constraint graph.
 
+![](./assets/constraint-graph.png)
 
+Owen depicts this constrained geometry and its corresponding constraint graph.
 
+![](./assets/owen-constraint-graph.png)
 
+The objective is to break the graph down into triangles which can be solved independently and recombined to form our target geometry.
+A key insight is that under a certain set of constriants each sub-problem acts as a rigid body which can be repositioned by sliding or rotating it in space.
 
+While analyzing our constraint graph we can also determine whether or not the system is well-constrained, under-constrained, or over-constrained.
+If the system is unsolvable the graph can also help use identify which geometric entities or constraints cause issues.
 
+Owen describes his analysis algorithm as such:
+
+![](./assets/owen-algorithm.png)
+
+The first step is to split the graph into biconnected components.
+A biconnected component means if you remove two points you can split the graph into two graphs.
+This pair of points is referred to as an articulation pair.
+
+In Owen's constraint graph we see 3 articulation pairs.
+
+![](./assets/owen-pairs.png)
+
+To reduce the graph we split at one of these articulation pairs. 
+Between the two nodes of that pair we then add a virtual bond, unless those nodes are already connected, or the graph has exactly one more complex subgraph.
+Repeat this process until the graph can not be split further.
+
+A tree of this decomposition can be found in [this 2022 review paper](./papers/geo-constraints-cad.pdf).
+
+![](./assets/zou-graph-tree.png)
+
+The final subgraphs are the leaves of the tree.
+
+![](./assets/zou-leaves.png)
+
+Let's figure out what this shape is.
+
+There are 4 points and 4 lines. 
+Each point as a constraint between them which will be a distance constraint.
+There is one constraint between 2 line which is an angle constraint.
+A visual representation of this can be seen below.
+
+![](./assets/zou-geometry.png)
+
+It's a rectangle.
+
+We can represent the graph like so:
+
+```js
+{
+    nodes: [
+        { id: 'point1', type: 'point' },
+        { id: 'point2', type: 'point' },
+        { id: 'point3', type: 'point' },
+        { id: 'point4', type: 'point' },
+        { id: 'line1', type: 'line' },
+        { id: 'line2', type: 'line' },
+        { id: 'line3', type: 'line' },
+        { id: 'line4', type: 'line' },
+    ],
+    edges: [
+        { id: 'edge1', type: 'angle', source: 'line1', target: 'line4' },
+        { id: 'edge2', type: 'distance', source: 'point1', target: 'point2' },
+        { id: 'edge3', type: 'distance', source: 'point2', target: 'point3' },
+        { id: 'edge4', type: 'distance', source: 'point3', target: 'point4' },
+        { id: 'edge5', type: 'distance', source: 'point4', target: 'point1' },
+        { id: 'edge6', type: 'connection', source: 'line1', target: 'point1' },
+        { id: 'edge7', type: 'connection', source: 'line2', target: 'point1' },
+        { id: 'edge8', type: 'connection', source: 'line2', target: 'point2' },
+        { id: 'edge9', type: 'connection', source: 'line3', target: 'point2' },
+        { id: 'edge10', type: 'connection', source: 'line3', target: 'point3' },
+        { id: 'edge11', type: 'connection', source: 'line4', target: 'point3' },
+        { id: 'edge12', type: 'connection', source: 'line4', target: 'point4' },
+        { id: 'edge13', type: 'connection', source: 'line1', target: 'point4' },
+    ]
+}
+```
+
+To find articulation pairs we'll first have to find articulation points.
+
+```js
+function findArticulationPoints(graph) {
+    const visited = {};
+    const depth = {};
+    const low = {};
+    const parent = {};
+    const articulationPoints = new Set();
+
+    function dfs(nodeId, d) {
+        visited[nodeId] = true;
+        depth[nodeId] = d;
+        low[nodeId] = d;
+        let childCount = 0;
+        let isArticulation = false;
+
+        // Collect all adjacent nodes
+        const adjacents = graph.edges
+            .filter(edge => edge.source === nodeId || edge.target === nodeId)
+            .map(edge => edge.source === nodeId ? edge.target : edge.source);
+
+        adjacents.forEach(ni => {
+            if (!visited[ni]) {
+                parent[ni] = nodeId;
+                childCount++;
+                dfs(ni, d + 1);
+                // Check if the subtree rooted at ni has connection back to one of ancestors of nodeId
+                if (low[ni] >= depth[nodeId]) {
+                    isArticulation = true;
+                }
+                low[nodeId] = Math.min(low[nodeId], low[ni]);
+            } else if (ni !== parent[nodeId]) {
+                low[nodeId] = Math.min(low[nodeId], depth[ni]);
+            }
+        });
+
+        // Check articulation conditions
+        if ((parent[nodeId] !== undefined && isArticulation) || (parent[nodeId] === undefined && childCount > 1)) {
+            articulationPoints.add(nodeId);
+        }
+    }
+
+    // Initialize DFS from all unvisited nodes (handles disconnected graphs)
+    graph.nodes.forEach(node => {
+        if (!visited[node.id]) {
+            dfs(node.id, 0);
+        }
+    });
+
+    return Array.from(articulationPoints);
+}
+```
+
+We can then identify pairs by removing a point (point1) and then checking for new articulation points (point2).
+If there are new articulation points then point1 and point2 form an articulation pair.
+
+```js
+function findArticulationPairs(graph) {
+    const pairs = [];
+
+    graph.nodes.forEach((node, i) => {
+        const newGraph = removeNode(graph, node.id)
+
+        const ap = findArticulationPoints(newGraph);
+
+        ap.forEach(n => {
+            pairs.push([node.id, n]);
+        })
+    })
+
+    return filterUniqueSets(pairs);
+}
+```
+
+[An implementation of splitting the graph at these points can be found (somewhere in) here](./demos/constructive-solver.js).
+
+You can see it being applied in the interactive demo below that shows the reduction of the rectangle.
+Virtual bonds are denoted with dashed lines. 
+Nodes for points have a black border.
+
+<div id="graph-solver" class="interactive-demo"></div>
+
+Let's convert our triangles into geometric elements.
+
+![](./assets/graph-triangles.png)
+
+We can now walk the decomposition graph in reverse to reconstruct our geometry.
+
+![](./assets/recombine.png)
+
+Notice how the vitrual bond (dashed line) represents a relative distance between two points,
+but we can't assign that distance and place the points until we can solve the relative distance with another subgraph of the system.
+
+These sub-systems can be solved in a variety of ways.
+Owen solves them algebraically using quadratics.
