@@ -33,14 +33,27 @@ export function initInteractiveConstraints(elId, ops = {}) {
           width: 400px;
           height: 400px;
           border: 1px solid black;
+          border-radius: 4px;
         }
       </style>
-      <svg id="constraints" viewBox="-100 -100 200 200">
-        ${state.heatMap.map(tile => drawHeatTile(tile))}
-        ${state.steps.map(points => drawPoints(points))}
-        ${state.lines.map(l => drawLine(l))}
-        ${Object.entries(state.pts).map(drawPoint)}
-      </svg>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <svg id="constraints" viewBox="-100 -100 200 200">
+          ${state.heatMap.map(tile => drawHeatTile(tile))}
+          ${state.steps.map(points => drawPoints(points))}
+          ${state.lines.map(l => drawLine(l))}
+          ${Object.entries(state.pts).map(drawPoint)}
+        </svg>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <span>show gradient:</span>
+          <input type="checkbox" .checked=${state.showHeatmap} @click=${(e) => { 
+            state.showHeatmap = e.target.checked;
+            if (state.showHeatmap === false) state.heatMap = [];
+            else initHeatmap();
+            state.r();
+          }}/>
+        </div>
+      </div>
     `
   }
 
@@ -86,7 +99,9 @@ export function initInteractiveConstraints(elId, ops = {}) {
 
   STATE.r = r;
 
-  if (STATE.showHeatmap) {
+  if (STATE.showHeatmap) initHeatmap();
+
+  function initHeatmap() {
 
 
     const constraints = STATE.constraints.map(x => x.eqs).flat();
