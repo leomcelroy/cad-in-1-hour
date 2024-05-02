@@ -17,100 +17,203 @@ marked.setOptions({
   renderer
 });
 
-const rawMarkdown = await fetch("./README.md").then(res => res.text());
-const html = marked(rawMarkdown);
+// get hash argument, if none then readme
 
-document.body.innerHTML = html;
-
-initGraphDecompositions("#graph-solver");
-
-initInteractiveConstraints("#interactive-constraint", {
-  pts: {
-    "a": { x: 0, y: 0 },
-    "b": { x: 0,  y: 50 },
-    "c": { x: 24,  y: 50 }
+const pages = {
+  "": async () => {
+    const rawMarkdown = await fetch("./README.md").then(res => res.text());
+    const html = marked(rawMarkdown);
+    document.querySelector("main").innerHTML = html;
   },
-  constraints: [
-    createDistanceConstraint("a", "b", 60),
-    createDistanceConstraint("b", "c", 30),
-    {
-      eqs: [
-        // "a_x",
-        // "a_y",
-        // "c_x - a_x",
-        // "c_y - b_y"
-      ]
-    } 
-  ],
-  fillMap: {
-      "a": "black",
-      "b": "black",
-      "c": "black"
-    },
-  lines: [
-      ["a", "b"],
-      ["b", "c"]
-    ],
-  showHeatmap: true
-});
+  "frep": async () => {
+    const rawMarkdown = await fetch("./frep.md").then(res => res.text());
+    const html = marked(rawMarkdown);
+    document.querySelector("main").innerHTML = html;
 
-initInteractiveConstraints("#interactive-constraint-angles", {
-  pts: {
-    "a": { x: 10, y: 0 },
-    "b": { x: 0,  y: 50 },
-    "c": { x: 24,  y: 50 },
-    "d": { x: 60,  y: 70 }
+    init2DFREP("#frep", {
+      sdfFuncString: `
+        let mySDF = circle(.5)
+        
+        return mySDF(x, y)
+      `,
+      resolution: 40,
+      showGrid: true,
+      showShape: false,
+    });
+
+    init2DFREP("#frep-trans", {
+      sdfFuncString: `
+        let mySDF = circle(.5)
+        
+        return mySDF(x+.4, y-.3)
+      `,
+      // resolution: 40,
+      // showGrid: true,
+      showShape: true,
+    });
+
+    init2DFREP("#frep-trans-func", {
+      sdfFuncString: `
+        let mySDF = circle(.5)
+        mySDF = translate(mySDF, .5, .5)
+        
+        return mySDF(x, y);
+      `,
+      // resolution: 40,
+      // showGrid: true,
+      showShape: true,
+    });
+
+    init2DFREP("#frep-union", {
+      sdfFuncString: `
+          let myRect = rectangle(1.2, 0.2)
+          let myCircle = circle(.54)
+          let final = union(myRect, myCircle)
+
+          return final(x, y);
+
+      `
+    });
+
+    init2DFREP("#frep-difference", {
+      sdfFuncString: `
+          let myRect = rectangle(1.2, 0.2)
+          let myCircle = circle(.54)
+          let final = difference(myRect, myCircle)
+
+          return final(x, y);
+
+      `
+    });
+
+    init2DFREP("#frep-intersection", {
+      sdfFuncString: `
+          let myRect = rectangle(1.2, 0.2)
+          let myCircle = circle(.54)
+          let final = intersection(myRect, myCircle)
+
+          return final(x, y);
+
+      `
+    });
+
+    init2DFREP("#frep-sampling-issue", {
+      sdfFuncString: `
+          let myRect = rectangle(1.2, 0.2)
+          let myCircle = circle(.54)
+          let final = union(myRect, myCircle)
+
+          return final(x, y);
+
+      `,
+      resolution: 10,
+      showGrid: true,
+    });
   },
-  constraints: [
-    // createDistanceConstraint("a", "b", 100),
-    createPointLineConstraint("b", "d", "c", 0),
-    // createDistanceConstraint("c", "d", 100),
-    createAngleConstraint("a", "b", "c", "d", 0),
-    {
-      eqs: [
-        "a_x",
-        // "a_y",
-        // "c_x - a_x",
-        // "c_y - b_y"
-      ]
-    } 
-  ],
-  fillMap: {
-      "a": "black",
-      "b": "black",
-      "c": "black"
-    },
-  lines: [
-      ["a", "b"],
-      ["c", "d"]
-    ],
-  // showHeatmap: true
-});
+  "mesh-voxel": async () => {
+    const rawMarkdown = await fetch("./mesh-voxel.md").then(res => res.text());
+    const html = marked(rawMarkdown);
+    document.querySelector("main").innerHTML = html;
+  },
+  "cad-history": async () => {
+    const rawMarkdown = await fetch("./cad-history.md").then(res => res.text());
+    const html = marked(rawMarkdown);
+    document.querySelector("main").innerHTML = html;
+  },
+  "constraints": async () => {
+    const rawMarkdown = await fetch("./constraints.md").then(res => res.text());
+    const html = marked(rawMarkdown);
+    document.querySelector("main").innerHTML = html;
 
-init2DFREP("#frep", {
-  sdfFuncString: `
-      let rect = rectangleSDF(1.2, .2);
-      let circle = circleSDF(.5);
-      // circle = translate(circle, .2, .2);
-      let final = union(rect, circle);
+    initGraphDecompositions("#graph-solver");
 
-      return final(x, y);
+    initInteractiveConstraints("#interactive-constraint", {
+      pts: {
+        "a": { x: 0, y: 0 },
+        "b": { x: 0,  y: 50 },
+        "c": { x: 24,  y: 50 }
+      },
+      constraints: [
+        createDistanceConstraint("a", "b", 60),
+        createDistanceConstraint("b", "c", 30),
+        {
+          eqs: [
+            // "a_x",
+            // "a_y",
+            // "c_x - a_x",
+            // "c_y - b_y"
+          ]
+        } 
+      ],
+      fillMap: {
+          "a": "black",
+          "b": "black",
+          "c": "black"
+        },
+      lines: [
+          ["a", "b"],
+          ["b", "c"]
+        ],
+      // showHeatmap: false
+    });
 
-  `
-});
+    initInteractiveConstraints("#interactive-constraint-angles", {
+      pts: {
+        "a": { x: 10, y: 0 },
+        "b": { x: 0,  y: 50 },
+        "c": { x: 24,  y: 50 },
+        "d": { x: 60,  y: 70 }
+      },
+      constraints: [
+        // createDistanceConstraint("a", "b", 100),
+        createPointLineConstraint("b", "d", "c", 0),
+        // createDistanceConstraint("c", "d", 100),
+        createAngleConstraint("a", "b", "c", "d", 0),
+        {
+          eqs: [
+            "a_x",
+            // "a_y",
+            // "c_x - a_x",
+            // "c_y - b_y"
+          ]
+        } 
+      ],
+      fillMap: {
+          "a": "black",
+          "b": "black",
+          "c": "black"
+        },
+      lines: [
+          ["a", "b"],
+          ["c", "d"]
+        ],
+      // showHeatmap: true
+    });
+  },
+  "brep": async () => {
+    const rawMarkdown = await fetch("./brep.md").then(res => res.text());
+    const html = marked(rawMarkdown);
+    document.querySelector("main").innerHTML = html;
+  },
+  "generative": async () => {},
+}
 
-init2DFREP("#frep2", {
-  sdfFuncString: `
-      let rect = rectangleSDF(.2, 1.2);
-      let circle = circleSDF(.54);
-      // circle = translate(circle, .2+.3, .2);
-      let final = union(rect, circle);
+window.onload = () => {
+  const setMain = (hash) => {
+    document.querySelector("main").innerHTML = "";
+    if (hash in pages) pages[hash]();
 
-      return final(x, y);
+    // hash = hash.replace('#', '');
+  }
 
-  `
-});
+  let hash = window.location.hash.replace('#', '');
+  setMain(hash);
 
+  window.addEventListener("hashchange", () => {
+    let hash = window.location.hash.replace('#', '');
+    setMain(hash);
+  })
+};
 
 
 function createAngleConstraint(p0, p1, p2, p3, angle) {

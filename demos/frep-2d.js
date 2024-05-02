@@ -39,6 +39,7 @@ const difference = (sdf1, sdf2) => (x, y) => Math.max(sdf1(x, y), -sdf2(x, y));
 export function init2DFREP(
   elId, 
   { 
+    resolution = 0,
     showGrid = false, 
     showShape = true,
     showField = false,
@@ -51,52 +52,14 @@ export function init2DFREP(
   let sdfFunc;
   if (sdfFuncString === "") {
     sdfFunc = (x, y) => {
-      let rect = rectangleSDF(1.2, .2);
-      let circle = circleSDF(.5);
-      // circle = translate(circle, .2, .2);
-      let final = union(rect, circle);
-
-      return final(x, y);
+      return false;
     }
   } else {
-    const include = `
-      const circleSDF = (radius) => (x, y) => {
-          return Math.sqrt(x**2 + y**2) - radius**2;
-      }
-
-      const rectangleSDF = (w, h) => (x, y) => {
-        const dx = Math.abs(x) - w / 2;
-        const dy = Math.abs(y) - h / 2;
-
-        const outsideDistance = Math.sqrt(Math.max(dx, 0) ** 2 + Math.max(dy, 0) ** 2);
-        const insideDistance = Math.min(Math.max(dx, dy), 0);
-
-        return outsideDistance + insideDistance;
-      }
-
-      const translate = (sdf, dx, dy) => {
-          return (x, y) => sdf(x-dx, y-dy);
-      }
-
-      const rotate = (sdf, angle) => {
-          // return (x, y) => sdf(x-dx, y+dy);
-      }
-
-      const scale = (sdf, sx, sy) => {
-          // return (x, y) => sdf(x-dx, y+dy);
-      }
-
-      const union = (sdf1, sdf2) => (x, y) => Math.min(sdf1(x, y), sdf2(x, y));
-      const intersection = (sdf1, sdf2) => (x, y) => Math.max(sdf1(x, y), sdf2(x, y));
-      const difference = (sdf1, sdf2) => (x, y) => Math.max(sdf1(x, y), -sdf2(x, y));
-    
-
-    `
-    sdfFunc = new Function("x", "y", include + sdfFuncString);
+    sdfFunc = makeSDFFunc(sdfFuncString);
   }
 
   const state = {
-    RESOLUTION: 0,
+    RESOLUTION: resolution,
     SHOW_GRID: showGrid,
     SHOW_SHAPE: showShape,
     SHOW_FIELD: showField,
@@ -204,7 +167,7 @@ export function init2DFREP(
               const ny = ((y / height) * 2 - 1);
 
               // Determine the color based on the signed distance
-              const inside = sdfFunc(nx, -ny) < 0;
+              const inside = sdfFunc(nx, ny) < 0;
               ctx.fillStyle = 'white'
               if (inside) ctx.fillRect(x, y, 1, 1);
           }
@@ -220,7 +183,7 @@ export function init2DFREP(
                 const ny = ((y / state.RESOLUTION) * 2 - 1) + 1/state.RESOLUTION;
 
                 // Determine the color based on the signed distance
-                const inside = sdfFunc(nx, -ny) < 0;
+                const inside = sdfFunc(nx, ny) < 0;
                 ctx.fillStyle = '#ff000090'
                 const cellSize = Math.min(width, height) / state.RESOLUTION;
                 if (inside)  ctx.fillRect(x*cellSize, y*cellSize, cellSize, cellSize);
@@ -321,7 +284,7 @@ function drawLevelSets(ctx, width, height, sdfFunc) {
             const ny = (y / height) * 2 - 1;
 
             // Determine the signed distance
-            const dist = sdfFunc(nx, -ny); // Assuming sdfFunc is defined to take normalized coords
+            const dist = sdfFunc(nx, ny); // Assuming sdfFunc is defined to take normalized coords
 
             // Color based on distance field
             ctx.fillStyle = getColorFromDistance(dist);
@@ -464,11 +427,13 @@ function addNumberScrubbing(el, run = null) {
 
 function makeSDFFunc(str) {
     const include = `
-      const circleSDF = (radius) => (x, y) => {
+      x = -x;
+
+      const circle = (radius) => (x, y) => {
           return Math.sqrt(x**2 + y**2) - radius**2;
       }
 
-      const rectangleSDF = (w, h) => (x, y) => {
+      const rectangle = (w, h) => (x, y) => {
         const dx = Math.abs(x) - w / 2;
         const dy = Math.abs(y) - h / 2;
 
@@ -479,16 +444,16 @@ function makeSDFFunc(str) {
       }
 
       const translate = (sdf, dx, dy) => {
-          return (x, y) => sdf(x-dx, y-dy);
+        return (x, y) => sdf(x+dx, y+dy);
       }
 
-      const rotate = (sdf, angle) => {
-          // return (x, y) => sdf(x-dx, y+dy);
-      }
+      // const rotate = (sdf, angle) => {
+      //     // return (x, y) => sdf(x-dx, y+dy);
+      // }
 
-      const scale = (sdf, sx, sy) => {
-          // return (x, y) => sdf(x-dx, y+dy);
-      }
+      // const scale = (sdf, sx, sy) => {
+      //     // return (x, y) => sdf(x-dx, y+dy);
+      // }
 
       const union = (sdf1, sdf2) => (x, y) => Math.min(sdf1(x, y), sdf2(x, y));
       const intersection = (sdf1, sdf2) => (x, y) => Math.max(sdf1(x, y), sdf2(x, y));

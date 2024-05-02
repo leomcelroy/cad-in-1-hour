@@ -62,6 +62,21 @@ p {
   padding-bottom: 10px;
 }
 
+ul {
+  padding-left: 45px;
+}
+
+#table-of-content {
+  width: 200px;
+  padding: 20px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 /* Header section */
 /*
 header {
@@ -106,6 +121,8 @@ header a:hover {
 .interactive-demo {
   display: flex;
   justify-content: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
 .editable-number:hover {
