@@ -6,7 +6,7 @@ Baumgart was interested in computer vision applications while Braid was interest
 One of the best [short explainers I can find on B-Reps is by Glen Grey](https://www.youtube.com/watch?v=sXbRT439vRI), a seemingly retired CAD developer who 
 creates educational youtube videos.
 
-<img src="assets/demo-step.png" style="width:100%"></img>
+<img src="assets/demo-step.png"  style="max-width:100%; width:100%;max-height:1000px"></img>
 [Play in Full Screen](https://step-test.glitch.me/)
 
 Boundary representation (BREP) represents a solid by defining the limits of its volume. 

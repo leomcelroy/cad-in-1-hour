@@ -127,6 +127,13 @@ Notice that with certain sampling resolutions we have quite a lot of error.
 
 <div id="frep-sampling-issue" class="interactive-demo"></div>
 
+__CAT__
+
+You can make a cat with CSG'ing SDF's.
+
+<div id="frep-cat" class="interactive-demo"></div>
+
+
 ### Improved Sampling (Intervals and Quadtrees)
 
 One issue is that cells in the sampling lattice are checked at a specific point. 
@@ -182,6 +189,9 @@ But how can we actually visualize this sphere in 3D (rather than [borrowing an i
 The most common approach is to use ray marching.
 
 ### Rendering 3D F-Reps/SDFs
+
+<img src="assets/ray-sdf.png" style="max-width:100%; width:100%;max-height:1000px"></img>
+[Play in Full Screen](https://raymarch-sdf-explainer.glitch.me/)
 
 The idea behind ray marching on SDF's is very simple but clever. 
 
