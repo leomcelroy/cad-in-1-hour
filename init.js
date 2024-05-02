@@ -109,6 +109,47 @@ const pages = {
       resolution: 10,
       showGrid: true,
     });
+
+    init2DFREP("#frep-cat",{
+      sdfFuncString: `
+          let {hypot,abs,min,max,sqrt,sign} = Math;
+          function box(px, py, bx, by) {
+            let dx = abs(px) - bx;
+            let dy = abs(py) - by;
+            return hypot(max(dx, 0), max(dy, 0)) + min(max(dx, dy), 0.0);
+          }
+          function trig(px, py, r) {
+            let k = sqrt(3.0);
+            px = abs(px) - r;
+            py = py + r / k;
+            if (px + k * py > 0.0)[px, py] = [(px - k * py) / 2, (-k * px - py) / 2];
+            px -= min(max(px, -2.0 * r), 0.0);
+            return -hypot(px, py) * sign(py);
+          }
+          function smooth_union(d1, d2, k) {
+            let h = min(max(0.5 + 0.5 * (d2 - d1) / k, 0.0), 1.0);
+            return (d2 * (1 - h) + d1 * h) - k * h * (1.0 - h);
+          }
+          return smooth_union(
+            smooth_union(
+              smooth_union(
+                smooth_union(
+                  smooth_union(
+                    hypot(x + 0.2, y) - 0.4,
+                    hypot(x - 0.2, y) - 0.4,
+                    0.05),
+                    hypot(x - 0.5, y + 0.3) - 0.3,
+                    0.02), 
+                    box(x - 0.3, y - 0.4, 0.1, 0.4), 
+                    0.05),
+                    box(x + 0.3, y + 0.1, 0.1, 0.9), 
+                    0.05),
+                    trig(x - 0.5, -y - 0.62, 0.12), 
+                    0.05);
+          `,
+          resolution: 10,
+          showGrid: true,
+    });
   },
   "mesh-voxel": async () => {
     const rawMarkdown = await fetch("./mesh-voxel.md").then(res => res.text());
