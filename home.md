@@ -4,6 +4,7 @@
 > The [version presented to the class is available here](https://fab.cba.mit.edu/classes/865.24/topics/design-tools/) with a [recording of the lecture available here](https://mit.zoom.us/rec/play/kY5T2RxteJq3wB2L9UOezzsS7mb54Ba3aqKuVYxqk8e92XZYpoZjR1DN0pFLE7IfVyfVl6Xmhh1fDD5T.i78AWp-Kgrm6Ybpe?canPlayFromShare=true&from=share_recording_detail&continueMode=true&componentName=rec-play&originRequestUrl=https%3A%2F%2Fmit.zoom.us%2Frec%2Fshare%2FmSbxXU1ap3euZp8TjonDAqmOeXrBUwPXN9e-dJ2e2kWVZ_HxQu6PQFhioWVrFPtt.O3SoIRlOUhdLGrsS).
 > I've re-hosted the portions of the lecture I (Leo) wrote to continue developing them further.
 > I still link to the exceptional Ray Marching and Anatomy of an STL demos developed by Lingdong.
+> You can find [the source for this site here](https://github.com/leomcelroy/cad-in-1-hour).
 
 ### The Lay of the Land
 
