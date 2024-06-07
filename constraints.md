@@ -1,12 +1,12 @@
 # Geometric Constraint Solvers
 
-Constraint solvers are allow designers to describe geometry based on relationships like coincidence between points, distances, and angles.
+Constraint solvers allow designers to describe geometry based on relationships like coincidence between points, distances, and angles.
 
 ![](./assets/onshape-sketch.png)
 
 There are a variety of approaches to constraint solving which can be surveyed in these papers.
 
-One of the leaders of the field was Christoph M. Hoffmann who spent a majority of his career at Purdue University. 
+One of the leaders of the field was Christoph Hoffmann who spent a majority of his career at Purdue University. 
 A majority of the papers linked were written by Christoph and his collaborators.
 
 Broadly constraint solvers can be broken down into
@@ -18,7 +18,7 @@ Broadly constraint solvers can be broken down into
 - Graph Techniques
   - Constructive
 
-Commerical solvers tend to mix approaches which are optimized for various scenerios.
+Commercial solvers tend to mix approaches which are optimized for various scenerios.
 
 For general reviews on constraint solving:
 
@@ -36,7 +36,7 @@ and Solvespace's solver.
 
 One of the best write ups on developing a constraint solver comes from [Solvespace](https://solvespace.com/index.pl). 
 
-Solvespace was created by Jonathan Westhues who wrote his one B-Rep engine and geometric constraint solver from scratch.
+Solvespace was created by Jonathan Westhues who wrote his own B-Rep engine and geometric constraint solver from scratch.
 
 Solvespace is an extremely well made small CAD tool that is quite useable though not quite at feature parity with industrial tools.
 The primary missing features are the ability to fillet and chamfer geometry after the fact.
@@ -48,51 +48,72 @@ Another write up of an [optimization approach to constraint solving can be found
 
 Another excellent write up by Matt Keeter on a [very simple least-squares gradient descent solver can be found here](https://www.mattkeeter.com/projects/constraints/).
 
-Below I'll describe my own similar approach to numerical constraint solving in much greater detail (and JavaScipt)
+Below I'll describe my own similar approach to numerical constraint solving in much fine detail (and JavaScipt).
 
 ### Numerical
 
 Let's start with a simple constraint system:
 
-- Point A in green is fixed at 0, 0.
-- Point B in blue is 10 units away from point A.
-- Point C is vertical to Point A.
-- Point C is horizontal to Point B.
+- Point A in green
+- Point B in blue
+- Point C is red
+- A is 60 units from B
+- B is 30 units from C
+
+Click and drag on the points! 
 
 <div id="interactive-constraint" class="interactive-demo"></div>
 
+See how the constraints are maintained as you drag points around.
+You can toggle `show gradient` to see the solution space for each point as you drag it.
+We'll understand what this is the gradient of in a moment.
+For illustrative purpose let's add a few different types of constraints and the simplest one we can think of.
+
+Imagine now
+
+- Point A in green
+- Point B in blue
+- Point C is red
+- Point A is fixed at 0, 0.
+- Point B is 60 units away from point A.
+- Point C is vertical to Point A.
+- Point C is horizontal to Point B.
+
+<div id="interactive-constraint-demo" class="interactive-demo"></div>
 
 Let's first think about how we could describe this system algebraically.
 
 - `a_x = 0` and `a_y = 0`
-- `sqrt( (b_x - a_x)^2 + (b_y - a_y)^2 ) = 10`
+- `sqrt( (b_x - a_x)^2 + (b_y - a_y)^2 ) = 60`
 - `c_x = a_x`
 - `c_y = b_y`
 
 Now that we have this system of equations how could we go about solving it.
 
-We could try to do so algebraically but this could be challanging as we require more variables.
+We could try to do so symbolically but this could be challanging as we require more variables.
 
 Instead (as the section title suggests) let's go about it numerically.
 
 This means we are going to use the computer for what it's really good at. 
-Doing lots of calculations repeated while attempting to approach a solution.
+Doing lots of calculations repeatedly while attempting to approach a solution.
 
 We will need to first develop a cost function. 
 We'll be using the gradient of this function to approach a solution so we want the solution to occur at some sort of extrema point.
-Let's use the minimum and the structure our cost function so the absolute minimums occur at 0.
-We can guarantee this by setting our equations to 0 and then take the same of each of them squared, so the 4 equations become:
+Let's use the minimum as our special point.
+We will structure our cost function so the absolute minimums occur at 0.
+
+We can guarantee this by setting our equations to 0.
 
 - `a_x - 0 = 0` and `a_y - 0 = 0`
-- `sqrt( (b_x - a_x)^2 + (b_y - a_y)^2 ) - 10 = 0`
+- `sqrt( (b_x - a_x)^2 + (b_y - a_y)^2 ) - 60 = 0`
 - `c_x - a_x = 0`
 - `c_y - b_y = 0`
 
-Which when all squared and added together become:
+And then squaring each term and taking the total sum.
 
 ```
 (a_x - 0)^2 + (a_y - 0)^2 
-+ (sqrt( (b_x - a_x)^2 + (b_y - a_y)^2 ) - 10)^2
++ (sqrt( (b_x - a_x)^2 + (b_y - a_y)^2 ) - 60)^2
 + (c_x - a_x)^2
 + (c_y - b_y)^2
 = 0
@@ -204,7 +225,7 @@ function distance(d, p0, p1) {
 }
 ```
 
-which can start to motivate why we want our little language. 
+The complexity of writing this can start to motivate why we want our little language. 
 There is still a better reason to come though.
 
 Speaking of which [the parser for the language is available here](./js/parser.js).
@@ -220,7 +241,33 @@ evaluate(equation, variableValues)
 Which can be used as such:
 
 ```js
-evaluate("sin(x)", { x: 1 })
+evaluate("x^2 + x - 4", { x: 1 })
+```
+
+which evaluates to
+
+```js
+{
+  type: "valder",
+  val: -2,
+  der: [ 3 ]
+}
+```
+
+Here is an example of a multivariable equation.
+
+```js
+evaluate("x^2+x-4 * y^2/4", { x: 1, y: 2 })
+```
+
+which evaluates to
+
+```js
+{
+  "type": "valder",
+  "val": -2,
+  "der": [ 3, -4 ]
+}
 ```
 
 Okay so now that we can express and evaluate the algebraic representations of our constraints let's solve our constraint problem by minimizing our cost function.
@@ -237,15 +284,16 @@ You can find [the complete implementation of the Levenberg-Marquardt and the num
 It provides us with this function:
 
 ```js
-
 function solveSystem(eqns, vars, ops) {
   ...
 }
 ```
+<br>
 
-`eqns` is a list of equation strings, 
-`vars` is an object of initial guesses of the form `{ "x": 1 }`,
-`ops` is optional arguments which include `{ forwardSubs, epsilon }`. 
+- `eqns` is a list of equation strings
+- `vars` is an object of initial guesses of the form `{ "x": 1 }`
+- `ops` is optional arguments which include `{ forwardSubs, epsilon }`
+
 Note that you can provide a list of forward substitions.
 This is one of the primary conviences of our choice to use a little language and to represent our equations as strings. 
 We can use string replacement to "symbolically" substitute some variables.
@@ -271,7 +319,7 @@ const constrainedGeometry = {
       c: { x: 0,  y: 50 }
     },
     constraints: [
-      createDistanceConstraint("a", "b", 10),
+      createDistanceConstraint("a", "b", 60),
       "a_x",
       "a_y",
       "c_x - a_x",
@@ -303,17 +351,29 @@ One of the benefits of this approach and having to provide an initial guess is t
 If a user drags a piece of geometry and we set the initial guess to that target we will likely find a solution near where the user requested.
 This can make the solver feel more intuitive to use.
 
+Let's look at some more constraints in our editor.
+
+Here we have a line-line angle constraint (in this case set to perpendicular) and a point line distance constraint (set to 0).
+
 <div id="interactive-constraint-angles" class="interactive-demo"></div>
 
-Show variety of constraint equations
+Here we have two parallel lines.
+
+<div id="interactive-constraint-parallel" class="interactive-demo"></div>
+
+We can add a constraint to make the two lines equal in length.
+
+<div id="interactive-constraint-parallel-equal" class="interactive-demo"></div>
+
+<!-- Show variety of constraint equations -->
 
 ### Graph Constructive
 
-The dominant approach to constraint solving today is analyize the constraint graph
-to develop a solution plan followed by a solver that recursively solves these sub problems and 
-recombines sub-solutions.
+The dominant approach to constraint solving today is to analyze the constraint graph
+to develop a solution plan of sub-problems, then recursively solve these sub-problems and 
+recombines sub-solutions until a complete solution is reached.
 
-There are a variety of approaches to these constructive solvers.
+There are a variety of approaches to creating these constructive solvers.
 Some reviews of decomposition approaches to constraint solving can be found below:
 
 [_Decomposition Plans for Geometric Constraint Systems, Part I: Performance Measures for CAD (2001)_](./papers/decomposition-plans-1.pdf)
@@ -341,11 +401,11 @@ Specific implementations of graph constructive solvers can be found in these pap
 
 [_A 2D geometric constraint solver using a graph reduction method (2010)_](./papers/aoudia-2010.pdf)
 
-Hoffman and Joan-Arinyo claim that ["such solvers can be implemented with minimal effort"](./papers/joan-arinyo-1997).
+Hoffman and Joan-Arinyo claim that ["such solvers can be implemented with minimal effort"](./papers/joan-arinyo-1997.pdf).
 
 ![](./assets/minimal-effort.png)
 
-And I took that personal. So let's do it...
+And I took that personally. So let's do it...
 
 As previously mentioned the first commerical constraint solver was developed by D-Cubed Ltd (once again based in Cambridge).
 D-Cubed was founded by John Owen and based their solver 2D DCM on work developed by Owen
@@ -394,7 +454,7 @@ The final subgraphs are the leaves of the tree.
 Let's figure out what this shape is.
 
 There are 4 points and 4 lines. 
-Each point as a constraint between them which will be a distance constraint.
+Each point has a constraint between them which will be a distance constraint.
 There is one constraint between 2 line which is an angle constraint.
 A visual representation of this can be seen below.
 
@@ -451,7 +511,7 @@ function findArticulationPoints(graph) {
         let childCount = 0;
         let isArticulation = false;
 
-        // Collect all adjacent nodes
+        // collect all adjacent nodes
         const adjacents = graph.edges
             .filter(edge => edge.source === nodeId || edge.target === nodeId)
             .map(edge => edge.source === nodeId ? edge.target : edge.source);
@@ -461,7 +521,7 @@ function findArticulationPoints(graph) {
                 parent[ni] = nodeId;
                 childCount++;
                 dfs(ni, d + 1);
-                // Check if the subtree rooted at ni has connection back to one of ancestors of nodeId
+                // check if the subtree rooted at ni has connection back to one of ancestors of nodeId
                 if (low[ni] >= depth[nodeId]) {
                     isArticulation = true;
                 }
@@ -471,13 +531,13 @@ function findArticulationPoints(graph) {
             }
         });
 
-        // Check articulation conditions
+        // check articulation conditions
         if ((parent[nodeId] !== undefined && isArticulation) || (parent[nodeId] === undefined && childCount > 1)) {
             articulationPoints.add(nodeId);
         }
     }
 
-    // Initialize DFS from all unvisited nodes (handles disconnected graphs)
+    // initialize DFS from all unvisited nodes (handles disconnected graphs)
     graph.nodes.forEach(node => {
         if (!visited[node.id]) {
             dfs(node.id, 0);
@@ -525,7 +585,7 @@ We can now walk the decomposition graph in reverse to reconstruct our geometry.
 
 ![](./assets/recombine.png)
 
-Notice how the vitrual bond (dashed line) represents a relative distance between two points,
+Notice how the virtual bond (dashed line) represents a relative distance between two points,
 but we can't assign that distance and place the points until we can solve the relative distance with another subgraph of the system.
 
 We can see our final geometry lines up with our original picture well.
@@ -534,3 +594,7 @@ We can see our final geometry lines up with our original picture well.
 
 These sub-systems can be solved in a variety of ways.
 Owen solves them algebraically using quadratics.
+
+[Previous: CAD History](./#cad-history)
+
+[Next: B-Rep](./#brep)

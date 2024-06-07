@@ -55,7 +55,9 @@ OpenCASCADE has a [web assembly port](https://github.com/donalffons/opencascade.
 There are some impressive individuals who have also made their own CAD programs including Solvespace which I'll discuss more later
 and [JSketcher](https://github.com/xibyte/jsketcher).
 
+[Previous: Meshes](./#mesh-voxel)
 
+[Next: Constraints](./#constraints)
 
 
 
