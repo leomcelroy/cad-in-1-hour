@@ -180,7 +180,7 @@ function addHandleControl(state, listen) {
   });
 
   listen("touchmove", "", e => {
-    if (draggingId === "") return
+    if (draggingId === "" && !e.target.matches("svg")) return
 
     e.preventDefault();
   })
