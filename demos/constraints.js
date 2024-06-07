@@ -29,14 +29,19 @@ export function initInteractiveConstraints(elId, ops = {}) {
   const view = (state) => {
     return html`
       <style>
-        #constraints {
+        .constraint-container {
           width: 400px;
+          max-width: 90%;
+          aspect-ratio: 1;
           height: 400px;
+        }
+
+        .constraint-container svg {
           border: 1px solid black;
           border-radius: 4px;
         }
       </style>
-      <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="constraint-container" style="display: flex; flex-direction: column; gap: 10px;">
         <svg id="constraints" viewBox="-100 -100 200 200">
           ${state.heatMap.map(tile => drawHeatTile(tile))}
           ${state.steps.map(points => drawPoints(points))}
@@ -169,13 +174,21 @@ export function initInteractiveConstraints(elId, ops = {}) {
 function addHandleControl(state, listen) {
   let draggingId = "";
 
-  listen("mousedown", "[handle]", e => {
+  listen("pointerdown", "[handle]", e => {
     const id = e.target.dataset.id;
     draggingId = id;
   });
 
-  listen("mousemove", "", e => {
+  listen("touchmove", "", e => {
     if (draggingId === "") return
+
+    e.preventDefault();
+  })
+
+  listen("pointermove", "", e => {
+    if (draggingId === "") return
+
+    e.preventDefault();
 
     const svg = e.target.closest("svg");
     if (!svg) return;
@@ -287,7 +300,7 @@ function addHandleControl(state, listen) {
     state.r();
   });
 
-  listen("mouseup", "", e => {
+  listen("pointerup", "", e => {
     if (draggingId === "") return
 
     const id = e.target.dataset.id;

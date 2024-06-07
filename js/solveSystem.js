@@ -25,7 +25,7 @@ function levenbergMarquardt(
     ogLambda = 10,
     lambdaUp = 10,
     lambdaDown = 10,
-    epsilon = 0.0000000000000001,
+    epsilon = 0.00000000001,
     fast = false,
     maxSteps = Infinity
   } = {}
@@ -121,7 +121,7 @@ function splitAt (index, array) {
 
 function solveSystem(eqns, vars, {
   forwardSubs = {},
-  epsilon = 0.0000000000000001,
+  epsilon = 0.00000000001,
   maxSteps = Infinity
 } = {}) {
   Object.entries(forwardSubs).forEach(([variable, value]) => {

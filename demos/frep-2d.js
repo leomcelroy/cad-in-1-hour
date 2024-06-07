@@ -1,41 +1,6 @@
 import { html, svg, render } from "../libs/lit-html.js";
 import { createListener } from "../js/createListener.js";
 
-// add option to show field
-// add option to type in sdfs
-// slider for inputs
-
-// Example SDF function for a circle
-const circleSDF = (radius) => (x, y) => {
-    return Math.sqrt(x**2 + y**2) - radius**2;
-}
-
-const rectangleSDF = (w, h) => (x, y) => {
-  const dx = Math.abs(x) - w / 2;
-  const dy = Math.abs(y) - h / 2;
-
-  const outsideDistance = Math.sqrt(Math.max(dx, 0) ** 2 + Math.max(dy, 0) ** 2);
-  const insideDistance = Math.min(Math.max(dx, dy), 0);
-
-  return outsideDistance + insideDistance;
-}
-
-const translate = (sdf, dx, dy) => {
-    return (x, y) => sdf(x-dx, y-dy);
-}
-
-const rotate = (sdf, angle) => {
-    // return (x, y) => sdf(x-dx, y+dy);
-}
-
-const scale = (sdf, sx, sy) => {
-    // return (x, y) => sdf(x-dx, y+dy);
-}
-
-const union = (sdf1, sdf2) => (x, y) => Math.min(sdf1(x, y), sdf2(x, y));
-const intersection = (sdf1, sdf2) => (x, y) => Math.max(sdf1(x, y), sdf2(x, y));
-const difference = (sdf1, sdf2) => (x, y) => Math.max(sdf1(x, y), -sdf2(x, y));
-
 export function init2DFREP(
   elId, 
   { 
@@ -66,14 +31,66 @@ export function init2DFREP(
     sdfFunc: sdfFunc
   }
 
+  // display: flex; 
+  // gap: 10px;
+
   const el = document.querySelector(elId);
   const r = () => render(html`
-    <div style="display: flex; flex-direction: column; gap: .7rem;">
-      <div style="display: flex; gap: 10px;">
-        <pre id="editor" contenteditable spellcheck="false" style="max-height: 400px; overflow: auto; max-width: 350px; background: #f3f3f3; padding: 10px; height: 100%; width: 350px; font-family: monospace; border: 1px solid black; border-radius: 5px;">${sdfFuncString}</pre>
+    <style>
+      .sdf-editor {
+        display: flex; 
+        flex-direction: column; 
+        gap: 0.7rem;
+      }
+
+      .code-canvas {
+        display: flex; 
+        gap: 10px;
+      }
+
+      .code-canvas pre {
+        max-height: 400px;
+        overflow: auto;
+        max-width: 350px;
+        background: #f3f3f3;
+        padding: 10px;
+        height: 100%;
+        width: 350px;
+        font-family: monospace;
+        border: 1px solid black;
+        border-radius: 5px;
+      }
+
+      .code-canvas canvas {
+        border-radius: 5px; 
+        border: 1px solid black;
+      }
+
+      .frep-controls {
+        width: 100%; 
+        display: flex; 
+        justify-content: 
+        space-around;
+      }
+
+      /* Media Query for Mobile Devices */
+      @media (max-width: 600px) {
+        .code-canvas, .frep-controls {
+          flex-direction: column;
+        }
+
+        .code-canvas pre, canvas {
+          max-width: 275px; /* Ensures both pre and canvas take full width */
+          width: 275px; /* Adjusts width to fit container */
+        }
+      }
+    </style>
+    <div class="sdf-editor">
+      <div class="code-canvas">
+        <pre id="editor" contenteditable spellcheck="false">${sdfFuncString}</pre>
         <canvas style="border-radius: 5px; border: 1px solid black;"></canvas>
       </div>
-      <div style="width: 100%; display: flex; justify-content: space-around;">
+      <div class="frep-controls">
         <button style="padding: 5px;" @click=${() => {
           el.querySelector("#editor").innerText = sdfFuncString;
           wrapNumbersInSpans(editor)
@@ -458,7 +475,18 @@ function makeSDFFunc(str) {
       const union = (sdf1, sdf2) => (x, y) => Math.min(sdf1(x, y), sdf2(x, y));
       const intersection = (sdf1, sdf2) => (x, y) => Math.max(sdf1(x, y), sdf2(x, y));
       const difference = (sdf1, sdf2) => (x, y) => Math.max(sdf1(x, y), -sdf2(x, y));
-    
+      
+      function smin(d1, d2, k) {
+          const h = Math.max(k - Math.abs(d1 - d2), 0.0) / k;
+          return Math.min(d1, d2) - h * h * h * k * (1.0 / 6.0);
+      }
+
+      const smoothMin = (sdf1, sdf2, k) => (x, y) => {
+        const d1 = sdf1(x, y);
+        const d2 = sdf2(x, y);
+
+        return smin(d1, d2, k)
+      }
 
     `
     return new Function("x", "y", include + str);

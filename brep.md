@@ -4,14 +4,15 @@ B-Reps were developed simultanously and independently in the 1970s by Ian Braid 
 Baumgart was interested in computer vision applications while Braid was interested in developing CAD tools.
 
 One of the best [short explainers I can find on B-Reps is by Glen Grey](https://www.youtube.com/watch?v=sXbRT439vRI), a seemingly retired CAD developer who 
-creates educational youtube videos.
+creates educational YouTube videos.
 
 <img src="assets/demo-step.png"  style="max-width:100%; width:100%;max-height:1000px"></img>
+
 [Play in Full Screen](https://step-test.glitch.me/)
 
-Boundary representation (BREP) represents a solid by defining the limits of its volume. 
+Boundary representation (B-Rep) represents a solid by defining the limits of its volume. 
 
-STEP file (ISO-10303) is a common data exchange format for encoding BREP's.
+STEP file (ISO-10303) is a common data exchange format for encoding B-Rep's.
 
 One idea about boundary representation is that you want a solid is watertight and manifold (no holes, fans, stray pieces etc.). 
 But since the solid is encoded as a collection of faces, there isn't a real guarentee that what you claim to be a closed shell is actually closed...
@@ -78,10 +79,10 @@ o.push(`#${af=id++}=ADVANCED_FACE('',(#${fb}),#${pl},.T.);`);
 ```
 
 
-The benefit of BREP is that you can manipuate things parametrically in CAD softwares.
+The benefit of B-Rep is that you can manipuate things parametrically in CAD softwares.
 
 For example, if you have a surface and a boundary, you can modify them independently.
 
 Whereas in STL's, there's no semantic information about any feature for manipulation, you only get coordinates about the final shape.
 
-
+[Previous: Constraints](./#constraints)
