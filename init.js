@@ -4,6 +4,15 @@ import { initInteractiveConstraints } from "./demos/constraints.js";
 import { init2DFREP } from "./demos/frep-2d.js";
 import { initGraphDecompositions } from "./demos/constructive-solver.js";
 
+document.getElementById('hamburger').addEventListener('click', function() {
+  var toc = document.getElementById('table-of-content');
+  if (toc.style.display === 'flex') {
+    toc.style.display = 'none';
+  } else {
+    toc.style.display = 'flex';
+  }
+});
+
 const renderer = new marked.Renderer();
 
 renderer.code = (code, infostring, escaped) => {
@@ -17,11 +26,9 @@ marked.setOptions({
   renderer
 });
 
-// get hash argument, if none then readme
-
 const pages = {
   "": async () => {
-    const rawMarkdown = await fetch("./README.md").then(res => res.text());
+    const rawMarkdown = await fetch("./home.md").then(res => res.text());
     const html = marked(rawMarkdown);
     document.querySelector("main").innerHTML = html;
   },
@@ -45,7 +52,7 @@ const pages = {
       sdfFuncString: `
         let mySDF = circle(.5)
         
-        return mySDF(x+.4, y-.3)
+        return mySDF(x + 0.41, y - 0.32)
       `,
       // resolution: 40,
       // showGrid: true,
@@ -97,18 +104,17 @@ const pages = {
       `
     });
 
-    init2DFREP("#frep-sampling-issue", {
+    init2DFREP("#frep-smooth", {
       sdfFuncString: `
-          let myRect = rectangle(1.2, 0.2)
-          let myCircle = circle(.54)
-          let final = union(myRect, myCircle)
+          let rect = rectangle(1.2, 0.2)
+          let cir = circle(.54)
+          let final = smoothMin(rect, cir, .5)
 
           return final(x, y);
 
-      `,
-      resolution: 10,
-      showGrid: true,
+      `
     });
+
 
     init2DFREP("#frep-cat",{
       sdfFuncString: `
@@ -147,8 +153,64 @@ const pages = {
                     trig(x - 0.5, -y - 0.62, 0.12), 
                     0.05);
           `,
-          resolution: 10,
-          showGrid: true,
+          // resolution: 10,
+          // showGrid: true,
+    });
+
+    init2DFREP("#frep-flower", {
+      sdfFuncString: `
+        return flowerWithStemSDF(x, y, 10, 0.4, .03);
+
+        function flowerWithStemSDF(x, y, numPetals, flowerSize, stemWidth) {
+            // angle in polar coordinates
+            const theta = Math.atan2(y, x);
+            
+            // radius in polar coordinates
+            const r = Math.sqrt(x * x + y * y); 
+
+            // sine function to create petals
+            const petalSin = Math.sin(numPetals * theta); 
+
+            // modulate radius for petal effect
+            const petalEffect = 0.2 * petalSin * petalSin * petalSin + 0.8; 
+
+            // distance to the flower boundary
+            const flowerDistance = r - flowerSize * petalEffect; 
+
+            // stem calculations
+
+            // noise along the y-axis for the stem
+            const noise = simpleNoise(y);
+            
+            // distance to the stem boundary with noise
+            let stemDistance = Math.abs(x - noise) - stemWidth;
+
+            // combine flower and stem using a smooth minimum function
+            return y < 0 ? flowerDistance : Math.min(flowerDistance, stemDistance);
+        }
+
+        function simpleNoise(x) {
+            return 0.03 * Math.sin(7 * x);
+        }
+
+      `
+    });
+
+
+
+    
+
+    init2DFREP("#frep-sampling-issue", {
+      sdfFuncString: `
+          let myRect = rectangle(1.2, 0.2)
+          let myCircle = circle(.54)
+          let final = union(myRect, myCircle)
+
+          return final(x, y);
+
+      `,
+      resolution: 10,
+      showGrid: true,
     });
   },
   "mesh-voxel": async () => {
@@ -170,9 +232,9 @@ const pages = {
 
     initInteractiveConstraints("#interactive-constraint", {
       pts: {
-        "a": { x: 0, y: 0 },
-        "b": { x: 0,  y: 50 },
-        "c": { x: 24,  y: 50 }
+        "a": randomPoint(),
+        "b": randomPoint(),
+        "c": randomPoint()
       },
       constraints: [
         createDistanceConstraint("a", "b", 60),
@@ -187,9 +249,9 @@ const pages = {
         } 
       ],
       fillMap: {
-          "a": "black",
-          "b": "black",
-          "c": "black"
+          "a": "green",
+          "b": "blue",
+          "c": "red"
         },
       lines: [
           ["a", "b"],
@@ -198,12 +260,42 @@ const pages = {
       // showHeatmap: false
     });
 
+    initInteractiveConstraints("#interactive-constraint-demo", {
+      pts: {
+        "a": randomPoint(),
+        "b": randomPoint(),
+        "c": randomPoint()
+      },
+      constraints: [
+        createDistanceConstraint("a", "b", 60),
+        // createDistanceConstraint("b", "c", 30),
+        {
+          eqs: [
+            "a_x",
+            "a_y",
+            "c_x - a_x",
+            "c_y - b_y"
+          ]
+        } 
+      ],
+      fillMap: {
+          "a": "green",
+          "b": "blue",
+          "c": "red"
+        },
+      lines: [
+          ["a", "b"],
+          ["b", "c"]
+        ],
+      showHeatmap: true
+    });
+
     initInteractiveConstraints("#interactive-constraint-angles", {
       pts: {
-        "a": { x: 10, y: 0 },
-        "b": { x: 0,  y: 50 },
-        "c": { x: 24,  y: 50 },
-        "d": { x: 60,  y: 70 }
+        "a": randomPoint(),
+        "b": randomPoint(),
+        "c": randomPoint(),
+        "d": randomPoint()
       },
       constraints: [
         // createDistanceConstraint("a", "b", 100),
@@ -212,18 +304,48 @@ const pages = {
         createAngleConstraint("a", "b", "c", "d", 0),
         {
           eqs: [
-            "a_x",
+            // "a_x",
             // "a_y",
             // "c_x - a_x",
             // "c_y - b_y"
           ]
         } 
       ],
-      fillMap: {
-          "a": "black",
-          "b": "black",
-          "c": "black"
-        },
+      lines: [
+          ["a", "b"],
+          ["c", "d"]
+        ],
+      // showHeatmap: true
+    });
+
+    initInteractiveConstraints("#interactive-constraint-parallel", {
+      pts: {
+        "a": randomPoint(),
+        "b": randomPoint(),
+        "c": randomPoint(),
+        "d": randomPoint()
+      },
+      constraints: [
+        createParallel("a", "b", "c", "d"),
+      ],
+      lines: [
+          ["a", "b"],
+          ["c", "d"]
+        ],
+      // showHeatmap: true
+    });
+
+    initInteractiveConstraints("#interactive-constraint-parallel-equal", {
+      pts: {
+        "a": randomPoint(),
+        "b": randomPoint(),
+        "c": randomPoint(),
+        "d": randomPoint()
+      },
+      constraints: [
+        createParallel("a", "b", "c", "d"),
+        createEqual("a", "b", "c", "d"),
+      ],
       lines: [
           ["a", "b"],
           ["c", "d"]
@@ -236,7 +358,16 @@ const pages = {
     const html = marked(rawMarkdown);
     document.querySelector("main").innerHTML = html;
   },
-  "generative": async () => {},
+  "interfaces": async () => {
+      const rawMarkdown = await fetch("./interfaces.md").then(res => res.text());
+      const html = marked(rawMarkdown);
+      document.querySelector("main").innerHTML = html;
+  },
+  "generative": async () => {
+      const rawMarkdown = await fetch("./generative.md").then(res => res.text());
+      const html = marked(rawMarkdown);
+      document.querySelector("main").innerHTML = html;
+  },
 }
 
 window.onload = () => {
@@ -256,6 +387,13 @@ window.onload = () => {
   })
 };
 
+function randInRange(min, max) {
+  return Math.random()*(max-min)+min;
+}
+
+function randomPoint() {
+  return { x: randInRange(-80, 80), y: randInRange(-80, 80) }
+}
 
 function createAngleConstraint(p0, p1, p2, p3, angle) {
   let l1p1x = `${p0}_x`;
@@ -322,23 +460,47 @@ function createPointLineConstraint(p0, p1, p2, dist) {
     }
 }
 
-// function createParallel(p0, p1, ) {
-//     let l1p1x = `x${this.points[0].id}`;
-//     let l1p1y = `y${this.points[0].id}`;
+function createParallel(p0, p1, p2, p3) {
+    let l1p1x = `${p0}_x`;
+    let l1p1y = `${p0}_y`;
 
-//     let l1p2x = `x${this.points[1].id}`;
-//     let l1p2y = `y${this.points[1].id}`;
+    let l1p2x = `${p1}_x`;
+    let l1p2y = `${p1}_y`;
 
-//     let l2p1x = `x${this.points[2].id}`;
-//     let l2p1y = `y${this.points[2].id}`;
+    let l2p1x = `${p2}_x`;
+    let l2p1y = `${p2}_y`;
 
-//     let l2p2x = `x${this.points[3].id}`;
-//     let l2p2y = `y${this.points[3].id}`;
+    let l2p2x = `${p3}_x`;
+    let l2p2y = `${p3}_y`;
 
-//     let top = `(-${l1p2x} + ${l1p1x}) * (${l2p2y} - ${l2p1y}) + (${l1p2y} - ${l1p1y}) * (${l2p2x} - ${l2p1x})`
+    let top = `(neg(${l1p2x}) + ${l1p1x}) * (${l2p2y} - ${l2p1y}) + (${l1p2y} - ${l1p1y}) * (${l2p2x} - ${l2p1x})`
 
-//     return [`${top}`];
-// }
+    return {
+      eqs: [`${top}`]
+    };
+}
+
+
+function createEqual(p0, p1, p2, p3) {
+  let l1p1x = `${p0}_x`;
+  let l1p1y = `${p0}_y`;
+
+  let l1p2x = `${p1}_x`;
+  let l1p2y = `${p1}_y`;
+
+  let l2p1x = `${p2}_x`;
+  let l2p1y = `${p2}_y`;
+
+  let l2p2x = `${p3}_x`;
+  let l2p2y = `${p3}_y`;
+
+  let d1 = `sqrt((${l1p2x}-${l1p1x})^2+(${l1p2y}-${l1p1y})^2)`
+  let d2 = `sqrt((${l2p2x}-${l2p1x})^2+(${l2p2y}-${l2p1y})^2)`
+
+  return {
+    eqs: [`${d2} - ${d1}`]
+  }
+}
 
 
 
