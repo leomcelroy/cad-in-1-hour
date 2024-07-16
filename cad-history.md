@@ -15,7 +15,7 @@ In 1978 the company released Romulus the world's first commercial solid modeling
 In 1986 Ian and two other founders left to start Three-Space Ltd. 
 Three-Space Ltd. created ACIS (Alan, Charles, Ian's System)
 
-Interesting ACIS was liscenced to Spatial Corp. which was acquired by Dassault Systemes.
+Interestingly ACIS was licensed to Spatial Corp. which was acquired by Dassault Systemes.
 
 And Shape Data developed Parasolid which was acquired by Siemens.
 
@@ -49,7 +49,7 @@ Interestingly there were more former D-Cubed Ltd employees wandering the comment
 ![](./assets/hn-comment-2.png)
 
 There are a few open source CAD kernels.
-Amoung them the most feature complete and robust is [OpenCASCADE](https://www.opencascade.com/). 
+Among them the most feature complete and robust is [OpenCASCADE](https://www.opencascade.com/). 
 OpenCASCADE has a [web assembly port](https://github.com/donalffons/opencascade.js) which you can see in action in [CascadeStudio](https://zalo.github.io/CascadeStudio/).
 
 There are some impressive individuals who have also made their own CAD programs including Solvespace which I'll discuss more later
