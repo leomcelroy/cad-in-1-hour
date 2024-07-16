@@ -90,7 +90,7 @@ Let's first think about how we could describe this system algebraically.
 
 Now that we have this system of equations how could we go about solving it.
 
-We could try to do so symbolically but this could be challanging as we require more variables.
+We could try to do so symbolically but this could be challenging as we require more variables.
 
 Instead (as the section title suggests) let's go about it numerically.
 
@@ -129,8 +129,8 @@ There are two degrees of freedom for each point.
 To apply gradient descent well also need the gradient at each evalution point.
 We can obtain this using [automatic differentiation](./papers/auto-diff.pdf) (in this case forward mode).
 
-Note that the equations above are not written in JavaScript, for convience I found it easier to write my own little differentable calculator language.
-The explanation below will explain why this was neccessary (it wasn't, but it did provide some convience).
+Note that the equations above are not written in JavaScript, for convenience I found it easier to write my own little differentable calculator language.
+The explanation below will explain why this was necessary (it wasn't, but it did provide some convenience).
 
 You can play with this calculator below it supports
 
@@ -295,7 +295,7 @@ function solveSystem(eqns, vars, ops) {
 - `ops` is optional arguments which include `{ forwardSubs, epsilon }`
 
 Note that you can provide a list of forward substitions.
-This is one of the primary conviences of our choice to use a little language and to represent our equations as strings. 
+This is one of the primary conveniences of our choice to use a little language and to represent our equations as strings. 
 We can use string replacement to "symbolically" substitute some variables.
 This is convienent for known equality constraints like coincidence, vertical, or horizontal.
 
@@ -425,7 +425,7 @@ The objective is to break the graph down into triangles which can be solved inde
 A key insight is that under a certain set of constriants each sub-problem acts as a rigid body which can be repositioned by sliding or rotating it in space.
 
 While analyzing our constraint graph we can also determine whether or not the system is well-constrained, under-constrained, or over-constrained.
-If the system is unsolvable the graph can also help use identify which geometric entities or constraints cause issues.
+If the system is unsolvable the graph can also help us identify which geometric entities or constraints cause issues.
 
 Owen describes his analysis algorithm as such:
 
