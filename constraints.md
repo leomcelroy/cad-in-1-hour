@@ -6,7 +6,7 @@ Constraint solvers allow designers to describe geometry based on relationships l
 
 There are a variety of approaches to constraint solving which can be surveyed in these papers.
 
-One of the leaders of the field was Christoph Hoffmann who spent a majority of his career at Purdue University. 
+One of the leaders of the field was Christoph Hoffmann who spent a majority of his career at Purdue University.
 A majority of the papers linked were written by Christoph and his collaborators.
 
 Broadly constraint solvers can be broken down into
@@ -22,29 +22,29 @@ Commercial solvers tend to mix approaches which are optimized for various scener
 
 For general reviews on constraint solving:
 
-[_A Geometric Constraint Solver (1993)_](./papers/bouma-1993.pdf)
+[_A Geometric Constraint Solver (1993)_](https://docs.lib.purdue.edu/cgi/viewcontent.cgi?article=2067&context=cstech)
 
-[_A brief on constraint solving (2004)_](./papers/constraint-brief.pdf)
+[_A brief on constraint solving (2004)_](https://upcommons.upc.edu/bitstream/handle/2117/83305/LSI-04-49-R.pdf?sequence=1&isAllowed=y)
 
-[_Geometric Constraint Solving in Parametric CAD (2011)_](./papers/geo-constraints-cad.pdf)
+[_Geometric Constraint Solving in Parametric CAD (2011)_](https://www.cs.purdue.edu/cgvlab/www/resources/papers/Bettig-Comp_and_Info_Sci_in_Eng-2011-Geometric_Constraint_Solving_In_Parametric_CAD.pdf)
 
-[_A review on geometric constraint solving (2022)_](./papers/geo-constraint-review-2022.pdf)
+[_A review on geometric constraint solving (2022)_](https://arxiv.org/pdf/2202.13795)
 
-Regarding open source constraint solvers there is [FreeCAD's planegcs](https://github.com/FreeCAD/FreeCAD/tree/main/src/Mod/Sketcher/App/planegcs) 
+Regarding open source constraint solvers there is [FreeCAD's planegcs](https://github.com/FreeCAD/FreeCAD/tree/main/src/Mod/Sketcher/App/planegcs)
 (which you can find [some discussion about here](https://forum.freecad.org/viewtopic.php?t=26737) and a [WASM port here](https://github.com/Salusoft89/planegcs))
 and Solvespace's solver.
 
-One of the best write ups on developing a constraint solver comes from [Solvespace](https://solvespace.com/index.pl). 
+One of the best write ups on developing a constraint solver comes from [Solvespace](https://solvespace.com/index.pl).
 
 Solvespace was created by Jonathan Westhues who wrote his own B-Rep engine and geometric constraint solver from scratch.
 
 Solvespace is an extremely well made small CAD tool that is quite useable though not quite at feature parity with industrial tools.
 The primary missing features are the ability to fillet and chamfer geometry after the fact.
 
-Westhues wrote up the inner workings of his [constraint solver here](./papers/sketchflat.pdf).
+Westhues wrote up the inner workings of his [constraint solver here](https://cq.cx/dl/sketchflat-internals.pdf).
 The document primarily describes a numerical approach to constraint solving.
 
-Another write up of an [optimization approach to constraint solving can be found here](./papers/optimization-solver.pdf).
+Another write up of an [optimization approach to constraint solving can be found here](https://www.sciencedirect.com/science/article/abs/pii/S0010448599000743).
 
 Another excellent write up by Matt Keeter on a [very simple least-squares gradient descent solver can be found here](https://www.mattkeeter.com/projects/constraints/).
 
@@ -60,7 +60,7 @@ Let's start with a simple constraint system:
 - A is 60 units from B
 - B is 30 units from C
 
-Click and drag on the points! 
+Click and drag on the points!
 
 <div id="interactive-constraint" class="interactive-demo"></div>
 
@@ -94,10 +94,10 @@ We could try to do so symbolically but this could be challenging as we require m
 
 Instead (as the section title suggests) let's go about it numerically.
 
-This means we are going to use the computer for what it's really good at. 
+This means we are going to use the computer for what it's really good at.
 Doing lots of calculations repeatedly while attempting to approach a solution.
 
-We will need to first develop a cost function. 
+We will need to first develop a cost function.
 We'll be using the gradient of this function to approach a solution so we want the solution to occur at some sort of extrema point.
 Let's use the minimum as our special point.
 We will structure our cost function so the absolute minimums occur at 0.
@@ -112,7 +112,7 @@ We can guarantee this by setting our equations to 0.
 And then squaring each term and taking the total sum.
 
 ```
-(a_x - 0)^2 + (a_y - 0)^2 
+(a_x - 0)^2 + (a_y - 0)^2
 + (sqrt( (b_x - a_x)^2 + (b_y - a_y)^2 ) - 60)^2
 + (c_x - a_x)^2
 + (c_y - b_y)^2
@@ -123,11 +123,11 @@ You can imagine gradient descent like the [image below from here](https://medium
 
 ![](./assets/gradient-descent.webp)
 
-Remember though our function is most likely in higher than 3 dimensions. 
+Remember though our function is most likely in higher than 3 dimensions.
 There are two degrees of freedom for each point.
 
 To apply gradient descent well also need the gradient at each evalution point.
-We can obtain this using [automatic differentiation](./papers/auto-diff.pdf) (in this case forward mode).
+We can obtain this using [automatic differentiation](https://epubs.siam.org/doi/epdf/10.1137/080743627) (in this case forward mode).
 
 Note that the equations above are not written in JavaScript, for convenience I found it easier to write my own little differentable calculator language.
 The explanation below will explain why this was necessary (it wasn't, but it did provide some convenience).
@@ -203,21 +203,21 @@ function mul(x0, x1) {
 
 You can find the [full automatic differentiation implementation here](./js/autodiff.js).
 
-Now just our distance equation will become 
+Now just our distance equation will become
 
 ```js
 function distance(d, p0, p1) {
 
-  const p0x = valder(p0[0], [1, 0, 0, 0]); 
-  const p0y = valder(p0[1], [0, 1, 0, 0]); 
-  const p1x = valder(p1[0], [0, 0, 1, 0]); 
+  const p0x = valder(p0[0], [1, 0, 0, 0]);
+  const p0y = valder(p0[1], [0, 1, 0, 0]);
+  const p1x = valder(p1[0], [0, 0, 1, 0]);
   const p1y = valder(p1[1], [0, 0, 0, 1]);
 
   return minus(
-    d, 
+    d,
     sqrt(
       plus(
-        power(minus(p1x, p0x), 2), 
+        power(minus(p1x, p0x), 2),
         power(minus(p1y, p0y), 2)
       )
     )
@@ -225,7 +225,7 @@ function distance(d, p0, p1) {
 }
 ```
 
-The complexity of writing this can start to motivate why we want our little language. 
+The complexity of writing this can start to motivate why we want our little language.
 There is still a better reason to come though.
 
 Speaking of which [the parser for the language is available here](./js/parser.js).
@@ -273,8 +273,8 @@ which evaluates to
 Okay so now that we can express and evaluate the algebraic representations of our constraints let's solve our constraint problem by minimizing our cost function.
 
 We could use strict gradient descent but there are algorithms that work better with these sorts of non-linear least squares problems.
-FreeCAD's solver planegcs gives options to use DogLeg, Levenberg-Marquardt, BFGS or SQP. 
-You can find a variety of [non-linear least squares optimization algorithms explained here](./papers/non-linear-least-squares.pdf).
+FreeCAD's solver planegcs gives options to use DogLeg, Levenberg-Marquardt, BFGS or SQP.
+You can find a variety of [non-linear least squares optimization algorithms explained here](https://www2.imm.dtu.dk/pubdb/edoc/imm3215.pdf).
 
 I've found the Levenberg–Marquardt algorithm works quite well.
 The Levenberg-Marquardt interpolates between Gauss-Newton and gradient descent.
@@ -295,7 +295,7 @@ function solveSystem(eqns, vars, ops) {
 - `ops` is optional arguments which include `{ forwardSubs, epsilon }`
 
 Note that you can provide a list of forward substitions.
-This is one of the primary conveniences of our choice to use a little language and to represent our equations as strings. 
+This is one of the primary conveniences of our choice to use a little language and to represent our equations as strings.
 We can use string replacement to "symbolically" substitute some variables.
 This is convienent for known equality constraints like coincidence, vertical, or horizontal.
 
@@ -336,7 +336,7 @@ Object.entries(constrainedGeometry.pts).forEach(([id, pt]) => {
 });
 
 const [ satisfied, solutions ] = solveSystem(
-  constrainedGeometry.constraints, 
+  constrainedGeometry.constraints,
   initialVals
 );
 
@@ -370,20 +370,20 @@ We can add a constraint to make the two lines equal in length.
 ### Graph Constructive
 
 The dominant approach to constraint solving today is to analyze the constraint graph
-to develop a solution plan of sub-problems, then recursively solve these sub-problems and 
+to develop a solution plan of sub-problems, then recursively solve these sub-problems and
 recombines sub-solutions until a complete solution is reached.
 
 There are a variety of approaches to creating these constructive solvers.
 Some reviews of decomposition approaches to constraint solving can be found below:
 
-[_Decomposition Plans for Geometric Constraint Systems, Part I: Performance Measures for CAD (2001)_](./papers/decomposition-plans-1.pdf)
+[_Decomposition Plans for Geometric Constraint Systems, Part I: Performance Measures for CAD (2001)_](https://www.sciencedirect.com/science/article/pii/S0747717100904024)
 
-[_Decomposition Plans for Geometric Constraint Problems, Part II: New Algorithms (2001)_](./papers/decomposition-plans-2.pdf)
+[_Decomposition Plans for Geometric Constraint Problems, Part II: New Algorithms (2001)_](https://www.cise.ufl.edu/~sitharam/pdfs/drtwo-final.pdf)
 
 The two papers above are once agian from Hoffman and his collaborators Andrew Lomonosov and Meera Sitharam.
 Sitharam is [currently at the University of Florida](https://www.cise.ufl.edu/~sitharam/) and did a lot of work developing
-the Frontier Vertex Algorithm for constraint solving. 
-[According to Bettig and Hoffman](./papers/geo-constraints-cad.pdf) the Frontier Vertex Algorithm completes graph decomposition.
+the Frontier Vertex Algorithm for constraint solving.
+[According to Bettig and Hoffman](https://www.cs.purdue.edu/cgvlab/www/resources/papers/Bettig-Comp_and_Info_Sci_in_Eng-2011-Geometric_Constraint_Solving_In_Parametric_CAD.pdf) the Frontier Vertex Algorithm completes graph decomposition.
 
 ![](./assets/frontier-vertex-complete.png)
 
@@ -391,17 +391,17 @@ the Frontier Vertex Algorithm for constraint solving.
 
 Other reviews can be found in:
 
-[_Decomposition of Geometric Constraint Systems: a Survey (2006)_](./papers/decomposition-2006.pdf)
+[_Decomposition of Geometric Constraint Systems: a Survey (2006)_](https://hal.science/hal-00481267/document)
 
-[_Geometric Constraint Solver (2016)_](./papers/These-Moussaoui_Nov_2016.pdf)
+[_Geometric Constraint Solver (2016)_](https://hal.science/tel-01402691/document)
 
 Specific implementations of graph constructive solvers can be found in these papers:
 
-[_A Graph-Constructive Approach to Solving Systems of Geometric Constraints (1997)_](./papers/fudos-1997.pdf)
+[_A Graph-Constructive Approach to Solving Systems of Geometric Constraints (1997)_](https://dl.acm.org/doi/pdf/10.1145/248210.248223)
 
-[_A 2D geometric constraint solver using a graph reduction method (2010)_](./papers/aoudia-2010.pdf)
+[_A 2D geometric constraint solver using a graph reduction method (2010)_](https://www.sciencedirect.com/science/article/abs/pii/S0965997810001006)
 
-Hoffman and Joan-Arinyo claim that ["such solvers can be implemented with minimal effort"](./papers/joan-arinyo-1997.pdf).
+Hoffman and Joan-Arinyo claim that ["such solvers can be implemented with minimal effort"](https://www.sciencedirect.com/science/article/pii/S0747717196900899).
 
 ![](./assets/minimal-effort.png)
 
@@ -409,7 +409,7 @@ And I took that personally. So let's do it...
 
 As previously mentioned the first commerical constraint solver was developed by D-Cubed Ltd (once again based in Cambridge).
 D-Cubed was founded by John Owen and based their solver 2D DCM on work developed by Owen
-and described in his 1991 paper [_Algebraic Solution for Geometry from Dimensional Constraints_](./papers/owen-constraints.pdf)
+and described in his 1991 paper [_Algebraic Solution for Geometry from Dimensional Constraints_](https://papers.cumincad.org/data/works/att/9ad2.content.pdf)
 
 The first step is to understand what exactly is a constraint graph.
 
@@ -439,11 +439,11 @@ In Owen's constraint graph we see 3 articulation pairs.
 
 ![](./assets/owen-pairs.png)
 
-To reduce the graph we split at one of these articulation pairs. 
+To reduce the graph we split at one of these articulation pairs.
 Between the two nodes of that pair we then add a virtual bond, unless those nodes are already connected, or the graph has exactly one more complex subgraph.
 Repeat this process until the graph can not be split further.
 
-A tree of this decomposition can be found in [this 2022 review paper](./papers/geo-constraints-cad.pdf).
+A tree of this decomposition can be found in [this 2022 review paper](https://arxiv.org/pdf/2202.13795).
 
 ![](./assets/zou-graph-tree.png)
 
@@ -453,7 +453,7 @@ The final subgraphs are the leaves of the tree.
 
 Let's figure out what this shape is.
 
-There are 4 points and 4 lines. 
+There are 4 points and 4 lines.
 Each point has a constraint between them which will be a distance constraint.
 There is one constraint between 2 line which is an angle constraint.
 A visual representation of this can be seen below.
@@ -572,7 +572,7 @@ function findArticulationPairs(graph) {
 [An implementation of splitting the graph at these points can be found (somewhere in) here](./demos/constructive-solver.js).
 
 You can see it being applied in the interactive demo below that shows the reduction of the rectangle.
-Virtual bonds are denoted with dashed lines. 
+Virtual bonds are denoted with dashed lines.
 Nodes for points have a black border.
 
 <div id="graph-solver" class="interactive-demo"></div>
