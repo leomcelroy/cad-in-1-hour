@@ -8,7 +8,7 @@ Let's start in 2D. If we wanted to describe a circle we can just write down the 
 
 We've drawn the boundary of a circle with a specific value for the radius.
 If we want to define an area let's calculate the distance to that boundary.
-We'll do that in a format we can actually make use of. 
+We'll do that in a format we can actually make use of.
 In JavaScript it will look like this:
 
 ```js
@@ -17,8 +17,8 @@ function circle(x, y, radius) => {
 }
 ```
 
-This is called a signed distance field (SDF) or signed distance function. 
-It's signed because inside the circle the result will be negative and outside it will be positive. 
+This is called a signed distance field (SDF) or signed distance function.
+It's signed because inside the circle the result will be negative and outside it will be positive.
 
 I'm going to rewrite this as a higher order function so we can apply tranformations to our SDF.
 
@@ -38,7 +38,7 @@ When the distance is negative we'll consider ourselves inside of the the circle 
 ```js
 for (let y = 0; y < RESOLUTION; y++) {
   for (let x = 0; x < RESOLUTION; x++) {
-    
+
     // normalize the coordinates to [-1, 1]
     // 1/RESOLUTION centers the sample in the cell
     const nx = ((x / RESOLUTION) * 2 - 1) + 1/RESOLUTION;
@@ -60,7 +60,7 @@ SDFs are the terminology more commonly used in shader art communities such as [S
 In this demo `circle` creates an SDF which takes `x` and `y`.
 We return that SDF and it gets rendered to the screen.
 
-If we want to move our shape we can just adjust `x` and `y`. 
+If we want to move our shape we can just adjust `x` and `y`.
 
 <div id="frep-trans" class="interactive-demo"></div>
 
@@ -75,8 +75,8 @@ const translate = (sdf, dx, dy) => {
 
 <div id="frep-trans-func" class="interactive-demo"></div>
 
-One of the major advantages of having closed form represenations of our objects is it's very easy to perfrom constructive solid geometry (CSG).
-This basically means we can perform boolean algebra on our shapes (intersections, unions, differences).
+One of the major advantages of having closed form representations of our objects is it's very easy to perform constructive solid geometry (CSG).
+This basically means we can perform boolean algebra on our shapes (and/intersections, or/unions, not/differences).
 
 The image below depicts CSG in 3D.
 
@@ -123,7 +123,7 @@ const rectangle = (cx, cy, w, h) => (x, y) => {
 
     return outsideDistance + insideDistance;
 }
-``` 
+```
 
 Now let's apply each CSG operation to our two shapes:
 
@@ -171,7 +171,7 @@ Notice that with certain sampling resolutions we have quite a lot of error.
 
 <div id="frep-sampling-issue" class="interactive-demo"></div>
 
-One issue is that cells in the sampling lattice are checked at a specific point. 
+One issue is that cells in the sampling lattice are checked at a specific point.
 A possible solution to this would be to perform membership tests on intervals.
 This is depicted in this image from [Adrian Bowyer](http://academy.cba.mit.edu/classes/old/cad_cam_cae/Bowyer.pdf).
 
@@ -219,12 +219,12 @@ function sphere(x, y, z, r) {
 
 ![](./assets/sphere-sdf.png)
 
-But how can we actually visualize this sphere in 3D (rather than [borrowing an image from Twitter](https://twitter.com/yongyuanxi/status/1354484070865113096/photo/1)). 
+But how can we actually visualize this sphere in 3D (rather than [borrowing an image from Twitter](https://twitter.com/yongyuanxi/status/1354484070865113096/photo/1)).
 The most common approach is to use ray marching.
 
 ### Rendering 3D F-Reps/SDFs
 
-The idea behind ray marching on SDF's is very simple but clever. 
+The idea behind ray marching on SDF's is very simple but clever.
 
 You shoot out a whole bunch of rays from your eyes, and let the rays hit stuff in the world.
 
@@ -252,7 +252,7 @@ You can read more about this approach in this great blog post by [Jamie Wong](ht
 
 ### Great work with F-Reps/SDFs
 
-Many of the internets greatest resources on SDFs come from Inigo Quilez. 
+Many of the internets greatest resources on SDFs come from Inigo Quilez.
 He is one of the creators of [Shader Toy](https://www.shadertoy.com/) which is an online editor for fragment shader art and a community of artists who create that style of work.
 
 Quilez has also written a number of blogs explaing SDF concepts in [2D](https://iquilezles.org/articles/distfunctions2d/) and [3D](https://iquilezles.org/articles/distfunctions/).
@@ -271,7 +271,7 @@ uses distance fields underneath the hood. Below you can see an impressive sculpt
 
 ![](./assets/dreams-demo.gif)
 
-You can see Alex Evans, co-founder and former CTO of Media Molecule (now at NVIDIA), 
+You can see Alex Evans, co-founder and former CTO of Media Molecule (now at NVIDIA),
 [speak at Umbra Ignite in 2015 about developing dreams](https://www.youtube.com/watch?v=u9KNtnCZDMI).
 
 The CBA has also worked on developing F-Rep modeling tools.
@@ -279,7 +279,7 @@ Matt Keeter created a nice timeline of some of this work (in addition to being a
 
 ![](./assets/cba-cad-tools.png)
 
-Note that not all of these tools are F-Rep specific. 
+Note that not all of these tools are F-Rep specific.
 Some that were though were Neil's python circuit designs, [Antimony](https://www.mattkeeter.com/projects/antimony/3/) by Matt, and [Matt's master's thesis work](https://cba.mit.edu/docs/theses/13.05.Keeter.pdf).
 
 Matt continued this work ultimately developing [LibFive](https://libfive.com/) which is used in [NTop](https://www.ntop.com/).
