@@ -12,7 +12,7 @@ Below is the landing page.
 ### The Lay of the Land
 
 Computer Aided Design (CAD) tools can be categorized in a variety of different ways.
-At a high-level you can separate tools based on how they represent geometry, 
+At a high-level you can separate tools based on how they represent geometry,
 such as whether objects are modeled by their exterior geometry or the interior space the object takes up.
 In other words is the object defined by its boundary or its volume.
 Is that geometric representation continuous or discrete (and limited to a particular resolution)?
@@ -22,8 +22,8 @@ Below we depict some CAD tools categorized by these dimensions (boundary/volume,
 ![](./assets/cad-landscape.png)
 
 Note that these categorizations are not formal and some tools may blur the lines between them or support multiple
-representations. 
-For example standard **solid** modeling tools for mechanical engineer (such as SolidWorks or Fusion360) use boundary representations (B-Reps).
+representations.
+For example standard **solid** modeling tools for mechanical engineering (such as SolidWorks or Fusion360) use boundary representations (B-Reps).
 These tools are designed to create solid models (as the name suggests) with watertight or manifold geometry.
 Some CAD tools restrict users to designing objects which are solid even though the underlying representation could describe non-solid geometry.
 
@@ -58,7 +58,5 @@ We'll have a lot to say about constraint solvers later in this write-up.
 
 We're going to introduce you to some of the key concepts needed to create design tools.
 We will introduce many of these concepts by demonstrating how to implement minimal versions
-of them in code (JavaScript!). 
-We will cover how to represent solids with distance fields, how to mesh those fields, some history of modern solid modeling CAD tools, constraint solvers, B-Reps through the context of the step format, and survey a few futuristic generative design tools. 
-
-
+of them in code (JavaScript!).
+We will cover how to represent solids with distance fields, how to mesh those fields, some history of modern solid modeling CAD tools, constraint solvers, B-Reps through the context of the step format, and survey a few futuristic generative design tools.
