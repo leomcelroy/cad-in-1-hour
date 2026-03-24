@@ -32,7 +32,7 @@ Another useful categorization of tools is parametric versus direct modeling (or 
 ![](./assets/parametric-vs-direct.png)
 
 In direct modeling tools users specify geometry manually, whereas in parametric design
-tools geometry can by derived from other features or abstract operations.
+tools geometry can be derived from other features or abstract operations.
 
 Parameterization can take many forms.
 One of the most general and common ways of parameterizing systems is simply coding.

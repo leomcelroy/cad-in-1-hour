@@ -2,7 +2,7 @@
 
 Solid modeling CAD tools standard for mechanical design can be defined by two technologies which constitute their "kernels": Boundary Representations (B-Reps) and geometric constraint solvers.
 
-B-Reps were introduced by Ian Braid in the 1970s while he was a PhD student at Cambridge University's Computet-Aided Design Group.
+B-Reps were introduced by Ian Braid in the 1970s while he was a PhD student at Cambridge University's Computer-Aided Design Group.
 
 He published on this work in his thesis titled _Designing with Volumes_ and also in papers such as [_The Synthesis of Solids Bounded by Many Faces_](https://dl.acm.org/doi/pdf/10.1145/360715.360727).
 
@@ -34,7 +34,7 @@ Dassault Systemes makes Solidworks which uses Parasolid (owned by Siemens).
 On top of all this in 1989 D-Cubed Ltd was founded and created DCM (Dimensional Constraint Manager).
 This is one of the first commercial geometric constraint solvers and it's now owned by Siemens.
 
-According to [this Hacker News commenter](https://news.ycombinator.com/item?id=30625341) (who worked at D-Cubed) it's also liscenced by most major CAD developers.
+According to [this Hacker News commenter](https://news.ycombinator.com/item?id=30625341) (who worked at D-Cubed) it's also licensed by most major CAD developers.
 
 ![](./assets/hn-comment.png)
 

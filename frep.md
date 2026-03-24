@@ -20,7 +20,7 @@ function circle(x, y, radius) => {
 This is called a signed distance field (SDF) or signed distance function.
 It's signed because inside the circle the result will be negative and outside it will be positive.
 
-I'm going to rewrite this as a higher order function so we can apply tranformations to our SDF.
+I'm going to rewrite this as a higher order function so we can apply transformations to our SDF.
 
 ```js
 const circle = (radius) => (x, y) => {
@@ -33,7 +33,7 @@ Great but how can we actually see that?
 Well the simplest approach would be to pick some sampling resolution.
 
 Place the circle in a grid and sample each cell.
-When the distance is negative we'll consider ourselves inside of the the circle and will fill the cell, when positive we'll be outside and will leave the cell empty.
+When the distance is negative we'll consider ourselves inside of the circle and will fill the cell, when positive we'll be outside and will leave the cell empty.
 
 ```js
 for (let y = 0; y < RESOLUTION; y++) {
@@ -177,7 +177,7 @@ This is depicted in this image from [Adrian Bowyer](http://academy.cba.mit.edu/c
 
 ![](./assets/rect-test.png)
 
-We can more efficiently store our cells in recusrive data structure like a quadtree ([images from here](https://groups.csail.mit.edu/graphics/classes/6.837/F98/talecture/)).
+We can more efficiently store our cells in recursive data structure like a quadtree ([images from here](https://groups.csail.mit.edu/graphics/classes/6.837/F98/talecture/)).
 
 <div style="display: flex; overflow: auto; border: 1px solid black; border-radius: 4px;">
   <img src="./assets/quadtree-1.png"/>
@@ -255,7 +255,7 @@ You can read more about this approach in this great blog post by [Jamie Wong](ht
 Many of the internets greatest resources on SDFs come from Inigo Quilez.
 He is one of the creators of [Shader Toy](https://www.shadertoy.com/) which is an online editor for fragment shader art and a community of artists who create that style of work.
 
-Quilez has also written a number of blogs explaing SDF concepts in [2D](https://iquilezles.org/articles/distfunctions2d/) and [3D](https://iquilezles.org/articles/distfunctions/).
+Quilez has also written a number of blogs explaining SDF concepts in [2D](https://iquilezles.org/articles/distfunctions2d/) and [3D](https://iquilezles.org/articles/distfunctions/).
 Note that these tutorials are written for shaders (so the calculations are done in parallel).
 
 Occasionally he also makes magical YouTube videos like [this demonstration of creating the Selfie Girl below](https://www.youtube.com/watch?v=8--5LwHRhjk).

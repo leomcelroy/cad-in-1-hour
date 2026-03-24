@@ -1,6 +1,6 @@
 # Boundary Representation (B-Rep)
 
-B-Reps were developed simultanously and independently in the 1970s by Ian Braid at Cambridge and Bruce Baumgart at Stanford.
+B-Reps were developed simultaneously and independently in the 1970s by Ian Braid at Cambridge and Bruce Baumgart at Stanford.
 Baumgart was interested in computer vision applications while Braid was interested in developing CAD tools.
 
 One of the best [short explainers I can find on B-Reps is by Glen Grey](https://www.youtube.com/watch?v=sXbRT439vRI), a seemingly retired CAD developer who 
@@ -14,8 +14,8 @@ Boundary representation (B-Rep) represents a solid by defining the limits of its
 
 STEP file (ISO-10303) is a common data exchange format for encoding B-Rep's.
 
-One idea about boundary representation is that you want a solid is watertight and manifold (no holes, fans, stray pieces etc.). 
-But since the solid is encoded as a collection of faces, there isn't a real guarentee that what you claim to be a closed shell is actually closed...
+One idea about boundary representation is that you want a solid to be watertight and manifold (no holes, fans, stray pieces etc.). 
+But since the solid is encoded as a collection of faces, there isn't a real guarantee that what you claim to be a closed shell is actually closed...
 
 Another emphasis is on hierarchical structure. A higher-level entity is parametrically defined by several lower-level entities.
 
@@ -30,7 +30,7 @@ In STEP files, roughly:
 - The curves can be circles, splines, etc.
 - The surfaces can be conical, spherical, etc.
 
-As you can see, STEP files are not afraid to introduce redundencies in order to keep the semantic right. Therefore they also tend to be quite verbose.
+As you can see, STEP files are not afraid to introduce redundancies in order to keep the semantic right. Therefore they also tend to be quite verbose.
 
 For example to encode a simple triangle (just 50 bytes in an STL file), you would have to do something like this:
 
@@ -79,7 +79,7 @@ o.push(`#${af=id++}=ADVANCED_FACE('',(#${fb}),#${pl},.T.);`);
 ```
 
 
-The benefit of B-Rep is that you can manipuate things parametrically in CAD softwares.
+The benefit of B-Rep is that you can manipulate things parametrically in CAD softwares.
 
 For example, if you have a surface and a boundary, you can modify them independently.
 

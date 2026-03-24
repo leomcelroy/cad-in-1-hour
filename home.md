@@ -20,7 +20,7 @@ Below we depict some CAD tools categorized by these dimensions (boundary/volume,
 
 Note that these categorizations are not formal and some tools may blur the lines between them or support multiple
 representations. 
-For example standard **solid** modeling tools for mechanical engineer (such as SolidWorks or Fusion360) use boundary representations (B-Reps).
+For example standard **solid** modeling tools for mechanical engineering (such as SolidWorks or Fusion360) use boundary representations (B-Reps).
 These tools are designed to create solid models (as the name suggests) with watertight or manifold geometry.
 Some CAD tools restrict users to designing objects which are solid even though the underlying representation could describe non-solid geometry.
 
@@ -29,7 +29,7 @@ Another useful categorization of tools is parametric versus direct modeling (or 
 ![](./assets/parametric-vs-direct.png)
 
 In direct modeling tools users specify geometry manually, whereas in parametric design
-tools geometry can by derived from other features or abstract operations.
+tools geometry can be derived from other features or abstract operations.
 
 Parameterization can take many forms.
 One of the most general and common ways of parameterizing systems is simply coding.

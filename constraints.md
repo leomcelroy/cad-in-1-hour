@@ -18,7 +18,7 @@ Broadly constraint solvers can be broken down into
 - Graph Techniques
   - Constructive
 
-Commercial solvers tend to mix approaches which are optimized for various scenerios.
+Commercial solvers tend to mix approaches which are optimized for various scenarios.
 
 For general reviews on constraint solving:
 
@@ -48,7 +48,7 @@ Another write up of an [optimization approach to constraint solving can be found
 
 Another excellent write up by Matt Keeter on a [very simple least-squares gradient descent solver can be found here](https://www.mattkeeter.com/projects/constraints/).
 
-Below I'll describe my own similar approach to numerical constraint solving in much fine detail (and JavaScipt).
+Below I'll describe my own similar approach to numerical constraint solving in much fine detail (and JavaScript).
 
 ### Numerical
 
@@ -126,10 +126,10 @@ You can imagine gradient descent like the [image below from here](https://medium
 Remember though our function is most likely in higher than 3 dimensions.
 There are two degrees of freedom for each point.
 
-To apply gradient descent well also need the gradient at each evalution point.
+To apply gradient descent we'll also need the gradient at each evaluation point.
 We can obtain this using [automatic differentiation](https://epubs.siam.org/doi/epdf/10.1137/080743627) (in this case forward mode).
 
-Note that the equations above are not written in JavaScript, for convenience I found it easier to write my own little differentable calculator language.
+Note that the equations above are not written in JavaScript, for convenience I found it easier to write my own little differentiable calculator language.
 The explanation below will explain why this was necessary (it wasn't, but it did provide some convenience).
 
 You can play with this calculator below it supports
@@ -145,7 +145,7 @@ You can play with this calculator below it supports
 - trigonometric functions: `sin`, `cos`, `tan`
 - inverse trigonometric functions: `asin`, `acos`, `atan`
 
-This works by representing numbers as dual numbers, which are pairs a value and it's derivative.
+This works by representing numbers as dual numbers, which are pairs a value and its derivative.
 
 ```js
 function valder (val, der) {
@@ -230,7 +230,7 @@ There is still a better reason to come though.
 
 Speaking of which [the parser for the language is available here](./js/parser.js).
 
-The [evaluator for the langauge can be found here](./js/evaluate.js).
+The [evaluator for the language can be found here](./js/evaluate.js).
 
 It provides us with this evaluate function:
 
@@ -294,10 +294,10 @@ function solveSystem(eqns, vars, ops) {
 - `vars` is an object of initial guesses of the form `{ "x": 1 }`
 - `ops` is optional arguments which include `{ forwardSubs, epsilon }`
 
-Note that you can provide a list of forward substitions.
+Note that you can provide a list of forward substitutions.
 This is one of the primary conveniences of our choice to use a little language and to represent our equations as strings.
 We can use string replacement to "symbolically" substitute some variables.
-This is convienent for known equality constraints like coincidence, vertical, or horizontal.
+This is convenient for known equality constraints like coincidence, vertical, or horizontal.
 
 So now with all of that we can describe our constrained system like so:
 
@@ -380,7 +380,7 @@ Some reviews of decomposition approaches to constraint solving can be found belo
 
 [_Decomposition Plans for Geometric Constraint Problems, Part II: New Algorithms (2001)_](https://www.cise.ufl.edu/~sitharam/pdfs/drtwo-final.pdf)
 
-The two papers above are once agian from Hoffman and his collaborators Andrew Lomonosov and Meera Sitharam.
+The two papers above are once again from Hoffman and his collaborators Andrew Lomonosov and Meera Sitharam.
 Sitharam is [currently at the University of Florida](https://www.cise.ufl.edu/~sitharam/) and did a lot of work developing
 the Frontier Vertex Algorithm for constraint solving.
 [According to Bettig and Hoffman](https://www.cs.purdue.edu/cgvlab/www/resources/papers/Bettig-Comp_and_Info_Sci_in_Eng-2011-Geometric_Constraint_Solving_In_Parametric_CAD.pdf) the Frontier Vertex Algorithm completes graph decomposition.
@@ -407,7 +407,7 @@ Hoffman and Joan-Arinyo claim that ["such solvers can be implemented with minima
 
 And I took that personally. So let's do it...
 
-As previously mentioned the first commerical constraint solver was developed by D-Cubed Ltd (once again based in Cambridge).
+As previously mentioned the first commercial constraint solver was developed by D-Cubed Ltd (once again based in Cambridge).
 D-Cubed was founded by John Owen and based their solver 2D DCM on work developed by Owen
 and described in his 1991 paper [_Algebraic Solution for Geometry from Dimensional Constraints_](https://papers.cumincad.org/data/works/att/9ad2.content.pdf)
 
@@ -422,7 +422,7 @@ Owen depicts this constrained geometry and its corresponding constraint graph.
 ![](./assets/owen-constraint-graph.png)
 
 The objective is to break the graph down into triangles which can be solved independently and recombined to form our target geometry.
-A key insight is that under a certain set of constriants each sub-problem acts as a rigid body which can be repositioned by sliding or rotating it in space.
+A key insight is that under a certain set of constraints each sub-problem acts as a rigid body which can be repositioned by sliding or rotating it in space.
 
 While analyzing our constraint graph we can also determine whether or not the system is well-constrained, under-constrained, or over-constrained.
 If the system is unsolvable the graph can also help us identify which geometric entities or constraints cause issues.

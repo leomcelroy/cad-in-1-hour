@@ -3,7 +3,7 @@ Kernels/Geometry Engines
 Boundary/Volume
 Discrete/Continuous
 Metric/Topological Data
-Constructive Solid Geometrey (CSG)
+Constructive Solid Geometry (CSG)
 
 - Geometry Representation
   - Pixels/Voxels (Discrete, Volumetric)
@@ -11,7 +11,7 @@ Constructive Solid Geometrey (CSG)
   - FREPs/SDFs (Closed Form, Volumetric)
   - BREPs
   - STLs (Discrete, Boundary)
-- Contraint Solving
+- Constraint Solving
   - Graph Construction
   - Solving
     - Numerical
