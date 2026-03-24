@@ -48,7 +48,7 @@ Another write up of an [optimization approach to constraint solving can be found
 
 Another excellent write up by Matt Keeter on a [very simple least-squares gradient descent solver can be found here](https://www.mattkeeter.com/projects/constraints/).
 
-Below I'll describe my own similar approach to numerical constraint solving in much fine detail (and JavaScript).
+Below I'll describe my own similar approach to numerical constraint solving in much finer detail (and JavaScript).
 
 ### Numerical
 
@@ -67,7 +67,7 @@ Click and drag on the points!
 See how the constraints are maintained as you drag points around.
 You can toggle `show gradient` to see the solution space for each point as you drag it.
 We'll understand what this is the gradient of in a moment.
-For illustrative purpose let's add a few different types of constraints and the simplest one we can think of.
+For illustrative purposes let's add a few different types of constraints and the simplest one we can think of.
 
 Imagine now
 
@@ -145,7 +145,7 @@ You can play with this calculator below it supports
 - trigonometric functions: `sin`, `cos`, `tan`
 - inverse trigonometric functions: `asin`, `acos`, `atan`
 
-This works by representing numbers as dual numbers, which are pairs a value and its derivative.
+This works by representing numbers as dual numbers, which are pairs of a value and its derivative.
 
 ```js
 function valder (val, der) {
@@ -371,7 +371,7 @@ We can add a constraint to make the two lines equal in length.
 
 The dominant approach to constraint solving today is to analyze the constraint graph
 to develop a solution plan of sub-problems, then recursively solve these sub-problems and
-recombines sub-solutions until a complete solution is reached.
+recombine sub-solutions until a complete solution is reached.
 
 There are a variety of approaches to creating these constructive solvers.
 Some reviews of decomposition approaches to constraint solving can be found below:
@@ -455,7 +455,7 @@ Let's figure out what this shape is.
 
 There are 4 points and 4 lines.
 Each point has a constraint between them which will be a distance constraint.
-There is one constraint between 2 line which is an angle constraint.
+There is one constraint between 2 lines which is an angle constraint.
 A visual representation of this can be seen below.
 
 ![](./assets/zou-geometry.png)

@@ -52,7 +52,7 @@ for (let y = 0; y < RESOLUTION; y++) {
 }
 ```
 
-Treating this expression as an inequality rather than a numeric value is typically considered the distinction between a functional representation (F-Rep) and a SDF (signed distance field).
+Treating this expression as an inequality rather than a numeric value is typically considered the distinction between a functional representation (F-Rep) and an SDF (signed distance field).
 SDFs are the terminology more commonly used in shader art communities such as [Shader Toy](https://www.shadertoy.com/).
 
 <div id="frep" class="interactive-demo"></div>
@@ -155,7 +155,7 @@ const smoothMin = (sdf1, sdf2, k) => (x, y) => {
 
 Inigo Quilez provides [a collection of useful shaping functions](https://iquilezles.org/articles/smin/).
 
-We could also implement the simple primitives ourself in this little editor.
+We could also implement the simple primitives ourselves in this little editor.
 Below we combine circles, boxes, and blending to make a cat.
 
 <div id="frep-cat" class="interactive-demo"></div>
@@ -177,7 +177,7 @@ This is depicted in this image from [Adrian Bowyer](http://academy.cba.mit.edu/c
 
 ![](./assets/rect-test.png)
 
-We can more efficiently store our cells in recursive data structure like a quadtree ([images from here](https://groups.csail.mit.edu/graphics/classes/6.837/F98/talecture/)).
+We can more efficiently store our cells in a recursive data structure like a quadtree ([images from here](https://groups.csail.mit.edu/graphics/classes/6.837/F98/talecture/)).
 
 <div style="display: flex; overflow: auto; border: 1px solid black; border-radius: 4px;">
   <img src="./assets/quadtree-1.png"/>
@@ -198,7 +198,7 @@ The algorithm is explained very clearly in [this figure from Wikipedia](https://
 
 ![](./assets/marching-squares.png)
 
-Notice how one can improve marching cubes by interpolating along the edge of our rules.
+Notice how one can improve marching squares by interpolating along the edge of our rules.
 
 Also notice one of the issues with the approach.
 The corners of our designs are getting lopped off.
@@ -224,7 +224,7 @@ The most common approach is to use ray marching.
 
 ### Rendering 3D F-Reps/SDFs
 
-The idea behind ray marching on SDF's is very simple but clever.
+The idea behind ray marching on SDFs is very simple but clever.
 
 You shoot out a whole bunch of rays from your eyes, and let the rays hit stuff in the world.
 
@@ -252,7 +252,7 @@ You can read more about this approach in this great blog post by [Jamie Wong](ht
 
 ### Great work with F-Reps/SDFs
 
-Many of the internets greatest resources on SDFs come from Inigo Quilez.
+Many of the internet's greatest resources on SDFs come from Inigo Quilez.
 He is one of the creators of [Shader Toy](https://www.shadertoy.com/) which is an online editor for fragment shader art and a community of artists who create that style of work.
 
 Quilez has also written a number of blogs explaining SDF concepts in [2D](https://iquilezles.org/articles/distfunctions2d/) and [3D](https://iquilezles.org/articles/distfunctions/).
@@ -267,7 +267,7 @@ Here is [another example of one of Quilez's artworks](https://www.shadertoy.com/
 ![](./assets/snail.png)
 
 The game making game [Dreams by Media Molecule](https://www.youtube.com/watch?v=2ltgkcoQzow&feature=youtu.be)
-uses distance fields underneath the hood. Below you can see an impressive sculpting video.
+uses distance fields under the hood. Below you can see an impressive sculpting video.
 
 ![](./assets/dreams-demo.gif)
 

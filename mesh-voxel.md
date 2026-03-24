@@ -40,7 +40,7 @@ You can see a figure from the paper below.
 ![](./assets/xeno-cad.png)
 
 As we demonstrated before there are lots of tools which use these types (SDFs, voxels, meshes) of geometric representations
-but typical solid modeling CAD tools do something different let's dig into what.
+but typical solid modeling CAD tools do something different. Let's dig into what.
 
 The authors of this work have also founded [The Institute for Computationally Designed Organisms (ICDO)](https://icdorgs.org/).
 

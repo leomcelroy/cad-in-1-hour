@@ -12,7 +12,7 @@ creates educational YouTube videos.
 
 Boundary representation (B-Rep) represents a solid by defining the limits of its volume. 
 
-STEP file (ISO-10303) is a common data exchange format for encoding B-Rep's.
+STEP file (ISO-10303) is a common data exchange format for encoding B-Reps.
 
 One idea about boundary representation is that you want a solid to be watertight and manifold (no holes, fans, stray pieces etc.). 
 But since the solid is encoded as a collection of faces, there isn't a real guarantee that what you claim to be a closed shell is actually closed...
@@ -30,7 +30,7 @@ In STEP files, roughly:
 - The curves can be circles, splines, etc.
 - The surfaces can be conical, spherical, etc.
 
-As you can see, STEP files are not afraid to introduce redundancies in order to keep the semantic right. Therefore they also tend to be quite verbose.
+As you can see, STEP files are not afraid to introduce redundancies in order to keep the semantics right. Therefore they also tend to be quite verbose.
 
 For example to encode a simple triangle (just 50 bytes in an STL file), you would have to do something like this:
 
@@ -79,10 +79,10 @@ o.push(`#${af=id++}=ADVANCED_FACE('',(#${fb}),#${pl},.T.);`);
 ```
 
 
-The benefit of B-Rep is that you can manipulate things parametrically in CAD softwares.
+The benefit of B-Rep is that you can manipulate things parametrically in CAD software.
 
 For example, if you have a surface and a boundary, you can modify them independently.
 
-Whereas in STL's, there's no semantic information about any feature for manipulation, you only get coordinates about the final shape.
+Whereas in STLs, there's no semantic information about any feature for manipulation, you only get coordinates about the final shape.
 
 [Previous: Constraints](./#constraints)
